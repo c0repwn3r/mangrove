@@ -1,19 +1,5 @@
-[package]
-name = "mangrove"
-version = "0.1.0"
-authors = ["c0repwn3r"]
-edition = "2021"
-description = "A cross-platform package manager purpose built for speed"
-documentation = "https://mgve.cc"
-repository = "https//mgve.cc/git"
-license = "GPL-3.0-or-later"
-
-
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-serde = { version = "1.0", features = ["derive"] }
-# Serializer testing
-serde_json = "1.0" # For diagnostics
-rmp-serde = "*"
+[workspace]
+members = [
+    "mangrove-cli",
+    "libmangrove"
+]

@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::mangrove::platform::Architecture;
-use crate::mangrove::version::{Version, VersionRange};
+use crate::platform::Architecture;
+use version::{Version, VersionReq};
 
 //
 // Package
@@ -21,31 +21,29 @@ pub struct Package {
     pub optdepends: Option<Vec<String>>, // Optional Depends: List of String (optional)
     pub provides: Option<Vec<PkgSpec>>,  // Provides: List of PkgSpec (optional)
     pub conflicts: Option<Vec<PkgSpec>>, // Conflicts: List of PkgSpec (optional)
-    pub replaces: Option<Vec<PkgSpec>>,  // Replaces: List of PkgSpec (optional) 
+    pub replaces: Option<Vec<PkgSpec>>,  // Replaces: List of PkgSpec (optional)
     pub installed_size: u64,             // Installed Size: integer (required)
-    pub pkgcontents: PackageContents     // Package Contents: PackageContents (required)
+    pub pkgcontents: PackageContents,    // Package Contents: PackageContents (required)
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PkgSpec {
     pub pkgname: String,
-    pub version: VersionRange
+    pub version: VersionReq,
 }
-
-
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageContents {
     pub folders: Option<Vec<PackageFolder>>,
     pub files: Option<Vec<PackageFile>>,
-    pub links: Option<Vec<PackageLink>>
+    pub links: Option<Vec<PackageLink>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageFolder {
     pub name: String,
     pub mtime: i32,
-    pub installpath: String
+    pub installpath: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -54,19 +52,29 @@ pub struct PackageFile {
     pub sha256: String,
     pub meta: FileMetadata,
     pub mtime: i32,
-    pub installpath: String
+    pub installpath: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageLink {
     pub file: String,
     pub mtime: i32,
-    pub target: String
+    pub target: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct FileMetadata {
     pub owner: i32,
     pub group: i32,
-    pub permissions: i32
+    pub permissions: i32,
+}
+
+// Utility macro for VersionReq { comparators: vec![] } because VersionReq::any() is dumb
+#[macro_export]
+macro_rules! version_any {
+    () => {
+        VersionReq {
+            comparators: vec![],
+        }
+    };
 }
