@@ -1,0 +1,13 @@
+Primary name: Mangrove
+Styled as:
+
+Mangrove
+mangrove
+mgve
+
+Colors:
+background: #071108
+primary: #545677
+accent: #3f826d
+brown: #7b3e19
+white: #d8ecf7
