@@ -1,3 +1,4 @@
+use k256::ecdsa::VerifyingKey;
 use serde::{Deserialize, Serialize};
 
 use crate::platform::Architecture;
@@ -78,3 +79,5 @@ macro_rules! version_any {
         }
     };
 }
+
+pub fn install_package(package_file: String, signature_file: String, key: VerifyingKey) {}
