@@ -1,8 +1,14 @@
 use serde::{Deserialize, Serialize};
-use std::fs::{self, create_dir_all};
+use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
+use tar::Builder;
 use uuid::Uuid;
+use zstd::stream::copy_encode;
 
-use crate::{crypt::mcrypt_sha256_verify_file, platform::Architecture};
+use crate::{
+    crypt::mcrypt_sha256_verify_file,
+    file::{get_cwd, set_cwd, FileOps},
+    platform::{arch_str, Architecture},
+};
 use version::{Version, VersionReq};
 
 //
@@ -26,6 +32,16 @@ pub struct Package {
     pub replaces: Option<Vec<PkgSpec>>,  // Replaces: List of PkgSpec (optional)
     pub installed_size: u64,             // Installed Size: integer (required)
     pub pkgcontents: PackageContents,    // Package Contents: PackageContents (required)
+}
+
+pub fn get_pkg_filename(package: &Package) -> String {
+    // pkgname_1.0.0-alpha.1+3423432_x86_64.mgve
+    format!(
+        "{}_{}_{}.mgve",
+        package.pkgname,
+        package.pkgver,
+        arch_str(&package.arch)
+    )
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -101,17 +117,17 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
     }
 
     // Step 2: Check package contents
-    let package_contents: PackageContents = package.pkgcontents;
+    let package_contents: &PackageContents = &package.pkgcontents;
     let mut need_directories: bool = true;
-    let mut directories: Vec<PackageFolder> = vec![];
-    let directories_check = package_contents.folders;
+    let mut directories: &Vec<PackageFolder> = &vec![];
+    let directories_check = &package_contents.folders;
     match directories_check {
         Some(x) => directories = x,
         None => need_directories = false,
     }
     let mut need_files: bool = true;
-    let mut files: Vec<PackageFile> = vec![];
-    let files_check = package_contents.files;
+    let mut files: &Vec<PackageFile> = &vec![];
+    let files_check = &package_contents.files;
     match files_check {
         Some(x) => files = x,
         None => need_files = false,
@@ -121,8 +137,9 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
     if need_directories {
         // Directories need to be created
         for dir in directories {
+            // Create the directory
             let path = format!("{}{}", &root, dir.name);
-            let create_dir_result = create_dir_all(path);
+            let create_dir_result = create_dir_all(&path);
             match create_dir_result {
                 Ok(_) => (),
                 Err(err) => return Err(format!("[!] Unable to create directory: {}", err)),
@@ -139,12 +156,7 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
             let e = mcrypt_sha256_verify_file(&orig, &file.sha256);
             match e {
                 Ok(_) => (),
-                Err(e) => {
-                    return Err(format!(
-                        "Failed to verify sha256 hash of {}: {}",
-                        &file.name, e
-                    ))
-                }
+                Err(e) => return Err(format!("Failed to verify sha256 hash of {}: {}", &orig, e)),
             }
             let target = format!("{}{}", &root, &file.name);
             let copy_result = fs::copy(&orig, target);
@@ -155,13 +167,73 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
         }
     }
     // Step 5: Write package metadata
-    // Step 6: Fakeroot
-    // Step 7: Set directory metadata
-    // Step 8: Set file metadata
-    // Step 9: Set link metadata
-    // Step 10: Create archive
-    // Step 11: Exit fakeroot
-    // Step 12: Return archive path
+    match Package::to_file(&package, format!("{}/pkginfo", &root)) {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to save pkginfo: {}", err)),
+    }
 
-    Ok("a".to_string())
+    // Step 6: Create archive
+    let old_dir = match get_cwd() {
+        Ok(f) => f,
+        Err(err) => return Err(err),
+    };
+    match set_cwd(&root) {
+        Ok(_) => (),
+        Err(err) => return Err(err),
+    }
+    let archive_path_uncompressed = format!("{}/{}.pcm", &data_dir, get_pkg_filename(&package));
+    let archive_path = format!("{}/{}", &data_dir, get_pkg_filename(&package));
+    let tar_archive_bare = match File::create(&archive_path_uncompressed) {
+        Ok(ptr) => ptr,
+        Err(err) => return Err(format!("Failed to open file for writing: {}", err)),
+    };
+    let mut tar = Builder::new(tar_archive_bare);
+    if need_files {
+        for file in files {
+            match tar.append_path(format!("./{}", file.name)) {
+                Ok(_) => (),
+                Err(err) => return Err(format!("Failed to write file to archive: {}", err)),
+            }
+        }
+    }
+    match tar.append_path("./pkginfo") {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to write file to archive: {}", err)),
+    }
+    match tar.finish() {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to finalize archive: {}", err)),
+    }
+
+    // Step 7: Return archive path
+    match set_cwd(&old_dir) {
+        Ok(_) => (),
+        Err(err) => return Err(err),
+    }
+
+    // Step 8: Remove dir
+    match remove_dir_all(&root) {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to remove tmpdir: {}", err)),
+    }
+
+    // Step 9: Compress file
+    let uncompressed_istream = match File::open(&archive_path_uncompressed) {
+        Ok(ptr) => ptr,
+        Err(err) => return Err(format!("Failed to open file for reading: {}", err)),
+    };
+    let compressed_ostream = match File::create(&archive_path) {
+        Ok(ptr) => ptr,
+        Err(err) => return Err(format!("Failed to open file for writing: {}", err)),
+    };
+    match copy_encode(uncompressed_istream, compressed_ostream, 9) {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to compress package: {}", err)),
+    }
+    match remove_file(archive_path_uncompressed) {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to remove temporary file: {}", err)),
+    }
+
+    Ok(archive_path)
 }

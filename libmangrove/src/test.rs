@@ -223,7 +223,7 @@ mod tests {
         println!("[*] Make sure test/package-saving/dont-have-permissions is set such that the current user cannot write to it.");
         let package: Package = get_test_package();
         // Try to write
-        let result = Package::to_file(package, "/path/nonexistent-file/".to_string());
+        let result = Package::to_file(&package, "/path/nonexistent-file/".to_string());
         if result.is_ok() {
             panic!();
         }
@@ -255,11 +255,13 @@ mod tests {
 
     #[test]
     fn package_saving() {
-        match save_package(get_test_package(), ".".to_string()) {
+        match save_package(
+            get_test_package(),
+            "/home/core/prj/personal/mangrove/test/test-package".to_string(),
+        ) {
             Ok(_) => (),
             Err(err) => {
-                println!("{}", err);
-                panic!();
+                panic!("{}", err);
             }
         }
     }
