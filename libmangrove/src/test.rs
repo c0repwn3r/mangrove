@@ -8,7 +8,7 @@ mod tests {
             PackageLink, PkgSpec,
         },
         platform::Architecture,
-        repo::RepoPackage, aes::AES128Cipher,
+        repo::RepoPackage, aes::{AES128Cipher, AES192Cipher, AES256Cipher},
     };
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
@@ -248,10 +248,30 @@ mod tests {
     }       
 
     #[test]
-    fn aes_lib_test() {
+    fn mcrypt_aes128() {
         let key = [42u8; 16];
         let mut cipher = AES128Cipher::new(key);
         let data = "abcdef".to_string().into_bytes();
+        let encrypted = cipher.encrypt(&data);
+        let decrypted = cipher.decrypt(&encrypted);
+        assert_eq!(data, decrypted);
+    }
+
+    #[test]
+    fn mcrypt_aes192() {
+        let key = [42u8; 24];
+        let mut cipher = AES192Cipher::new(key);
+        let data = "abcdefghijklmnopqrstuvwxyz".to_string().into_bytes();
+        let encrypted = cipher.encrypt(&data);
+        let decrypted = cipher.decrypt(&encrypted);
+        assert_eq!(data, decrypted);
+    }
+
+    #[test]
+    fn mcrypt_aes256() {
+        let key = [42u8; 32];
+        let mut cipher = AES256Cipher::new(key);
+        let data = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)!@#$%^&*(".to_string().into_bytes();
         let encrypted = cipher.encrypt(&data);
         let decrypted = cipher.decrypt(&encrypted);
         assert_eq!(data, decrypted);

@@ -7,4 +7,5 @@ pub mod platform; // Platform-specific code
 pub mod repo; // Structs and functions for dealing with Repositories
 pub mod stropt; // String operations
 pub mod test; // Testing
+#[macro_use]
 pub mod aes; // AES helper functions
