@@ -7,7 +7,7 @@ use zstd::stream::copy_encode;
 use crate::{
     crypt::mcrypt_sha256_verify_file,
     file::{get_cwd, set_cwd, FileOps},
-    platform::{arch_str, Architecture},
+    platform::{arch_str, Architecture}
 };
 use version::{Version, VersionReq};
 

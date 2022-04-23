@@ -1,8 +1,7 @@
-use k256::ecdsa::VerifyingKey;
 use serde::{Deserialize, Serialize};
 use version::Version;
 
-use crate::{pkg::Package, platform::Architecture};
+use crate::{pkg::Package, platform::Architecture, crypt::PublicKey};
 
 // Repository
 // Contains all data the package manager knows about a repository
@@ -13,7 +12,7 @@ pub struct Repository {
     pub repo_base_url: String,
     pub supported_architectures: Vec<Architecture>,
     pub contents: Vec<RepoData>,
-    pub signing_key: VerifyingKey,
+    pub signing_key: PublicKey,
 }
 
 // RepoInfo

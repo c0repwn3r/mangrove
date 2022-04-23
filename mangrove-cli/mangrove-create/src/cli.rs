@@ -1,4 +1,4 @@
-use clap::{Command, arg};
+use clap::{arg, Command};
 
 pub fn get_command() -> Command<'static> {
     Command::new("mangrove-create")
@@ -11,7 +11,7 @@ pub fn get_command() -> Command<'static> {
         .subcommand(
             Command::new("new")
                 .about("Create a new mangrove package in the specified directory.")
-                .arg(arg!([directory])),
+                .arg(arg!([directory]).required(true)),
         )
         .subcommand(
             Command::new("init")

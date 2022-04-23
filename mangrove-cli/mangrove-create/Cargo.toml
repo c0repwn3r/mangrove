@@ -12,5 +12,7 @@ license = "GPL-3.0-or-later"
 
 [dependencies]
 libmangrove = { version = "0.1.0", path = "../../libmangrove/", package = "libmangrove" }
-clap = { version = "3.1.10", features = ["derive", "cargo"] }
+clap = { version = "3.1.10", features = ["derive", "cargo", "suggestions"] }
 clap_complete = "3.1.2"
+toml = "0.5.9"
+version = { version = "1.0.7", features = ["serde"], package="semver" }

@@ -8,12 +8,8 @@ mod tests {
             PackageLink, PkgSpec,
         },
         platform::Architecture,
-        repo::RepoPackage,
+        repo::RepoPackage, aes::AES128Cipher,
     };
-    use k256::ecdsa::{
-        signature::Signer, signature::Verifier, Signature, SigningKey, VerifyingKey,
-    };
-    use rand::rngs::OsRng;
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
     fn get_test_package() -> Package {
@@ -239,21 +235,6 @@ mod tests {
     }
 
     #[test]
-    fn test_ecdsa_library() {
-        let test_msg: String = String::from("Hello, world!");
-        println!("message: {}", test_msg);
-        let msg: &[u8] = test_msg.as_bytes();
-        let signing_key: SigningKey = SigningKey::random(&mut OsRng);
-        println!("signing key: {:x?}", hex::encode(signing_key.to_bytes()));
-        let signature: Signature = signing_key.sign(msg);
-        println!("signature: {:x?}", hex::encode(signature));
-        let public_key: VerifyingKey = VerifyingKey::from(&signing_key);
-        println!("public key: {:x?}", hex::encode(public_key.to_bytes()));
-        let valid = public_key.verify(msg, &signature).is_ok();
-        assert!(valid);
-    }
-
-    #[test]
     fn package_saving() {
         match save_package(
             get_test_package(),
@@ -264,5 +245,15 @@ mod tests {
                 panic!("{}", err);
             }
         }
+    }       
+
+    #[test]
+    fn aes_lib_test() {
+        let key = [42u8; 16];
+        let mut cipher = AES128Cipher::new(key);
+        let data = "abcdef".to_string().into_bytes();
+        let encrypted = cipher.encrypt(&data);
+        let decrypted = cipher.decrypt(&encrypted);
+        assert_eq!(data, decrypted);
     }
 }
