@@ -8,7 +8,7 @@ mod tests {
             PackageLink, PkgSpec,
         },
         platform::Architecture,
-        repo::RepoPackage, aes::{AES128Cipher, AES192Cipher, AES256Cipher},
+        repo::RepoPackage, aes::{AES128Cipher, AES192Cipher, AES256Cipher}, crypt::{encrypt_package, PrivateKey, decrypt_package},
     };
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
@@ -275,5 +275,21 @@ mod tests {
         let encrypted = cipher.encrypt(&data);
         let decrypted = cipher.decrypt(&encrypted);
         assert_eq!(data, decrypted);
+    }
+
+    #[test]
+    fn mcrypt_pkg_encryption() {
+        let pkg = get_test_package_bytes(); // Get a test package in bytes
+        let sk = PrivateKey::generate("testkey".to_string());
+        let pk = sk.derive();
+        let encrypted = match encrypt_package(&sk, &pkg) {
+            Ok(e) => e,
+            Err(err) => panic!("{}", err)
+        };
+        let decrypted = match decrypt_package(&pk, encrypted) {
+            Ok(d) => d,
+            Err(err) => panic!("{}", err)
+        };
+        assert_eq!(pkg, decrypted);
     }
 }
