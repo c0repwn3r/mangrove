@@ -216,13 +216,15 @@ mod tests {
     #[test]
     fn package_save_to_file_does_not_exist() {
         // Get a test package
-        println!("[*] Make sure test/package-saving/dont-have-permissions is set such that the current user cannot write to it.");
         let package: Package = get_test_package();
         // Try to write
-        let result = Package::to_file(&package, "/path/nonexistent-file/".to_string());
-        if result.is_ok() {
-            panic!();
-        }
+        assert!(Package::to_file(&package, "/path/nonexistent-file/".to_string()).is_err());
+    }
+
+    #[test]
+    fn package_save_to_file_without_permissions() {
+        let package: Package = get_test_package();
+        assert!(Package::to_file(&package, "/root/cant-write-here/".to_string()).is_err());
     }
 
     #[test]

@@ -79,7 +79,6 @@ macro_rules! aes_cipher {
                 // for the padding, so simply convert the last element of the array to a usize,
                 // then remove that many elements from the end
                 let pad_amt = data[data.len() - 1] as usize;
-                println!("{}", pad_amt);
                 if pad_amt > data.len() || data[data.len() - pad_amt] != pad_amt as u8 {
                     // no padding present
                     return data;

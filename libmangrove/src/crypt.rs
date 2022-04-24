@@ -88,7 +88,6 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
     let mut signature_b = signature.to_bytes().to_vec();
     let aes_key = mcrypt_sha256_raw(&signature_b);
     let key = array_ref!(aes_key, 0, 32);
-    println!("{:x?}", key);
     let mut aes_cipher = AES256Cipher::new(*key);
     let data_arr: &[u8] = data;
     let mut enc_data = aes_cipher.encrypt(data_arr);
@@ -98,10 +97,7 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
     header.push(0x00);
     header.append(&mut (enc_data.len() as u32).to_be_bytes().to_vec());
     header.append(&mut enc_data);
-    println!("{}", header.len() - 1);
-    print!("offset of p_val: {} to ", header.len());
     header.push(0x42u8);
-    println!("{}", header.len() - 1);
     Ok(header)
 }
 
