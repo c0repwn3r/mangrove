@@ -1,3 +1,10 @@
+//! # libmangrove
+//! 
+//! `libmangrove` is a crate containing the original (reference) implementation of the Mangrove packaging system.
+//! **It does not implement the CLI, it is merely the library to perform the actual packaging operations.**
+//! Looking for the CLI? Check out mangrove-cli.
+//! 
+
 pub mod crypt; // Various cryptographic helper functions to remove repetitive code
 pub mod db; // Package database
 pub mod file; // Traits, structs, and functions for interfacing with the filesystem

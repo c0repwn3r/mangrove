@@ -5,5 +5,7 @@ Mangrove is a package manager which is purpose-built for speed. It is well docum
 ## Links
 
 [Website](https://mgve.cc)
+
 [Repository](https://git.coredoes.dev/c0repwn3r/mangrove) - primary git repository
+
 [GitHub Mirror](https://github.com/c0repwn3r/mangrove) - mirror, used for CI/CD

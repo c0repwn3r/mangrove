@@ -1,7 +1,10 @@
+//! # Provides implementation of FileOps for Package
+
 use crate::{file::FileOps, pkg::Package};
 use std::fs;
 
 impl FileOps for Package {
+    /// Takes a Package and saves it to the specified file
     fn to_file(data: &Package, filename: String) -> Result<(), String> {
         // step 1: serialize myself
         let pkginfo_serialization_result = rmp_serde::to_vec(data);
@@ -22,6 +25,7 @@ impl FileOps for Package {
         }
     }
 
+    /// Creates a Package from the data contained in a Package
     fn from_file(filename: String) -> Result<Package, String> {
         // step 1: load the file
         let read_result = fs::read(filename);

@@ -1,5 +1,7 @@
 # Package format
 
+This document concerns unsigned packages. If you're looking for signed packages, see [Signed packages](signed.md)
+
 A Mangrove package is a zstandard-compressed tar archive with the following file structure:
 
 ```txt
@@ -58,4 +60,8 @@ The above data is serialized as:
 8d a7 70 6b 67 6e 61 6d 65 aa 68 65 6c 6c 6f 77 6f 72 6c 64 a6 70 6b 67 76 65 72 a5 31 2e 30 2e 30 a9 73 68 6f 72 74 64 65 73 63 bd 41 20 70 61 63 6b 61 67 65 20 74 6f 20 73 61 79 20 68 65 6c 6c 6f 20 77 6f 72 6c 64 2e a4 61 72 63 68 a6 78 38 36 5f 36 34 a3 75 72 6c b3 68 74 74 70 73 3a 2f 2f 65 78 61 6d 70 6c 65 2e 63 6f 6d a7 6c 69 63 65 6e 73 65 ae 47 50 4c 2d 33 2d 6f 72 2d 6c 61 74 65 72 a6 67 72 6f 75 70 73 92 a7 65 78 61 6d 70 6c 65 a4 74 65 73 74 a7 64 65 70 65 6e 64 73 92 b7 68 65 6c 6c 6f 2d 77 6f 72 6c 64 2d 64 61 74 61 3e 3d 30 2e 30 2e 31 ad 6c 69 6e 75 78 3e 3d 35 2e 31 36 2e 31 aa 6f 70 74 64 65 70 65 6e 64 73 91 d9 27 63 6f 6f 6c 2d 74 68 69 6e 67 79 40 31 2e 30 2e 30 3a 20 66 6f 72 20 64 6f 69 6e 67 20 63 6f 6f 6c 20 74 68 69 6e 67 a8 70 72 6f 76 69 64 65 73 91 b1 68 65 6c 6c 6f 2d 77 6f 72 6c 64 40 32 2e 30 2e 30 a9 63 6f 6e 66 6c 69 63 74 73 91 b2 62 61 64 2d 70 72 6f 67 72 61 6d 3c 3d 31 2e 30 2e 30 a8 72 65 70 6c 61 63 65 73 b2 6f 6c 64 2d 70 72 6f 67 72 61 6d 3e 3d 31 2e 30 2e 30 ae 69 6e 73 74 61 6c 6c 65 64 5f 73 69 7a 65 ce 16 fd ac 5f
 ```
 
-Only 359 bytes!
+Unlike most other package managers, Mangrove **does not** store file metadata inside the package.
+As the required metadata (install path, owner, group, permissions, mtime, etc) is present inside the pkginfo file, it is not required to also be stored that way.
+This allows very lenient storage of files inside the package, as long as the sha256 sums match it will be able to install the file properly.
+
+By design, Mangrove will make a fuss about installing unsigned packages (the format described here). This is to prevent you from accidentically installing shady packages from random websites. For more details on how package signing works, see [Package signing](signed.md)

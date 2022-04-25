@@ -1,3 +1,5 @@
+//! # Various cryptographic helper functions to remove repetitive code
+
 use arrayref::array_ref;
 use ed25519_dalek::{Keypair, PublicKey as VerifyingKey, Signature, Signer, Verifier};
 use rand_dalek::rngs::OsRng;
@@ -7,6 +9,9 @@ use std::{fs::File, io};
 
 use crate::aes::AES256Cipher;
 
+// mcrypt_sha256_file
+/// Get the sha256 hash of the given file
+//
 pub fn mcrypt_sha256_file(filename: &String) -> Result<String, String> {
     let file_r = File::open(filename);
     let mut file_ptr = match file_r {
@@ -21,6 +26,9 @@ pub fn mcrypt_sha256_file(filename: &String) -> Result<String, String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
+// mcrypt_sha256_verify_file
+/// Validate that the provided file matches the sha256 hash
+//
 pub fn mcrypt_sha256_verify_file(filename: &String, expect: &String) -> Result<(), String> {
     let sha256 = match mcrypt_sha256_file(filename) {
         Ok(hash) => hash,
@@ -33,12 +41,18 @@ pub fn mcrypt_sha256_verify_file(filename: &String, expect: &String) -> Result<(
     }
 }
 
+// PublicKey
+/// Represents a verifying key, with a name and the actual key data
+//
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublicKey {
     pub name: String,
     pub key_data: VerifyingKey,
 }
 
+// PrivateKey
+/// Represents a signing key, with a name and the actual key data
+//
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrivateKey {
     pub name: String,
@@ -46,6 +60,9 @@ pub struct PrivateKey {
 }
 
 impl PrivateKey {
+    // generate
+    /// Generate a randomized PrivateKey
+    //
     pub fn generate(name: String) -> PrivateKey {
         let mut rng = OsRng {};
         let keypair = Keypair::generate(&mut rng);
@@ -55,6 +72,9 @@ impl PrivateKey {
         }
     }
 
+    // derive
+    /// Derive a PublicKey from this PrivateKey
+    //
     pub fn derive(&self) -> PublicKey {
         PublicKey {
             name: self.name.clone(),
@@ -63,6 +83,9 @@ impl PrivateKey {
     }
 }
 
+// mcrypt_sha256_raw
+/// Given a raw byte array, get the sha256 hash of it and return its digest in bytes
+//
 pub fn mcrypt_sha256_raw(data: &[u8]) -> Vec<u8> {
     let mut hasher = Sha256::new();
     hasher.update(data);
@@ -70,6 +93,9 @@ pub fn mcrypt_sha256_raw(data: &[u8]) -> Vec<u8> {
     data.to_vec()
 }
 
+// encrypt_package
+/// Given a PrivateKey and any arbitrary data array, encrypt it using the Signed Package format and return the result as a byte array
+//
 pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String> {
     // Encrypted package format:
     // field  value         description
@@ -101,6 +127,9 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
     Ok(header)
 }
 
+// decrypt_package
+/// Validate and decrypt a package in the Signed Package format
+//
 pub fn decrypt_package(vkey: &PublicKey, data: Vec<u8>) -> Result<Vec<u8>, String> {
     // Check for the magic
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {

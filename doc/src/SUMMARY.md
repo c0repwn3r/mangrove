@@ -12,5 +12,6 @@
 - [Internals](./internals.md)
   - [Transactions](./internals/transactions.md)
   - [Package format](./pkg/index.md)
+    - [Signed packages](./pkg/signed.md)
   - [Specifying packages](./internals/pkgspec.md)
-  - [Branchleaf](./internals/branchleaf.md)
+  - [Trustcache](./internals/trustcache.md)

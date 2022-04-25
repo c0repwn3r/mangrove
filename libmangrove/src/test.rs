@@ -1,14 +1,19 @@
+//! # libmangrove tests
+//! This module contains the libmangrove test suite. It does nothing useful otherwise.
+
 #[cfg(test)]
 mod tests {
 
     use crate::{
+        aes::{AES128Cipher, AES192Cipher, AES256Cipher},
+        crypt::{decrypt_package, encrypt_package, PrivateKey},
         file::FileOps,
         pkg::{
             save_package, FileMetadata, Package, PackageContents, PackageFile, PackageFolder,
             PackageLink, PkgSpec,
         },
         platform::Architecture,
-        repo::RepoPackage, aes::{AES128Cipher, AES192Cipher, AES256Cipher}, crypt::{encrypt_package, PrivateKey, decrypt_package},
+        repo::RepoPackage,
     };
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
@@ -247,7 +252,7 @@ mod tests {
                 panic!("{}", err);
             }
         }
-    }       
+    }
 
     #[test]
     fn mcrypt_aes128() {
@@ -273,7 +278,9 @@ mod tests {
     fn mcrypt_aes256() {
         let key = [42u8; 32];
         let mut cipher = AES256Cipher::new(key);
-        let data = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)!@#$%^&*(".to_string().into_bytes();
+        let data = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)!@#$%^&*("
+            .to_string()
+            .into_bytes();
         let encrypted = cipher.encrypt(&data);
         let decrypted = cipher.decrypt(&encrypted);
         assert_eq!(data, decrypted);
@@ -286,11 +293,11 @@ mod tests {
         let pk = sk.derive();
         let encrypted = match encrypt_package(&sk, &pkg) {
             Ok(e) => e,
-            Err(err) => panic!("{}", err)
+            Err(err) => panic!("{}", err),
         };
         let decrypted = match decrypt_package(&pk, encrypted) {
             Ok(d) => d,
-            Err(err) => panic!("{}", err)
+            Err(err) => panic!("{}", err),
         };
         assert_eq!(pkg, decrypted);
     }

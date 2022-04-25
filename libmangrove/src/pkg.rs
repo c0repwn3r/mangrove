@@ -1,3 +1,5 @@
+//! # Structs and functions for dealing with Packages
+
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use tar::Builder;
@@ -13,7 +15,7 @@ use version::{Version, VersionReq};
 
 //
 // Package
-// Responsible for representing all data about a package
+/// Responsible for representing all data about a package
 //
 #[derive(Serialize, Deserialize, Debug, PartialEq)] // Allow serde to do its magic
 pub struct Package {
@@ -34,6 +36,9 @@ pub struct Package {
     pub pkgcontents: PackageContents,    // Package Contents: PackageContents (required)
 }
 
+// get_pkg_filename
+/// Utility function to get the filename for a Package
+//
 pub fn get_pkg_filename(package: &Package) -> String {
     // pkgname_1.0.0-alpha.1+3423432_x86_64.mgve
     format!(
@@ -44,12 +49,18 @@ pub fn get_pkg_filename(package: &Package) -> String {
     )
 }
 
+// PkgSpec
+/// Represents a package specification (ie `test-package>=1`)
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PkgSpec {
     pub pkgname: String,
     pub version: VersionReq,
 }
 
+// PackageContents
+/// Represents the contents of a package
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageContents {
     pub folders: Option<Vec<PackageFolder>>,
@@ -57,6 +68,9 @@ pub struct PackageContents {
     pub links: Option<Vec<PackageLink>>,
 }
 
+// PackageFolder
+/// Represents a folder a package creates, and its metadata
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageFolder {
     pub name: String,
@@ -65,6 +79,9 @@ pub struct PackageFolder {
     pub meta: FileMetadata,
 }
 
+// PackageFile
+/// Represents a file inside a package, and its metadata
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageFile {
     pub name: String,
@@ -74,6 +91,9 @@ pub struct PackageFile {
     pub installpath: String,
 }
 
+// PackageLink
+/// Represents a symbolic link that should be created by a package, and its metadata
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageLink {
     pub file: String,
@@ -81,6 +101,9 @@ pub struct PackageLink {
     pub target: String,
 }
 
+// FileMetadata
+/// Represents metadata on a file or folder
+//
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct FileMetadata {
     pub owner: i32,
@@ -88,7 +111,7 @@ pub struct FileMetadata {
     pub permissions: i32,
 }
 
-// Utility macro for VersionReq { comparators: vec![] } because VersionReq::any() is dumb
+/// Utility macro for VersionReq { comparators: vec![] } because VersionReq::any() is dumb
 #[macro_export]
 macro_rules! version_any {
     () => {
@@ -98,6 +121,9 @@ macro_rules! version_any {
     };
 }
 
+// save_package
+/// Given a Package and a data_dir, use the files contained in the data_dir to build an unsigned .mgve package
+//
 pub fn save_package(package: Package, data_dir: String) -> Result<String, String> {
     // Step 1: Create temporary dir
     let random_identifier: String = Uuid::new_v4().to_string(); // Get a random uuidv4
@@ -236,4 +262,13 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
     }
 
     Ok(archive_path)
+}
+
+//
+// PackageType
+// Represents the type of package
+//
+pub enum PackageType {
+    UnsignedPackage,
+    SignedPackage
 }

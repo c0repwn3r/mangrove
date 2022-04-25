@@ -1,8 +1,10 @@
+//! # High-level pure-rust AES implementation using the `aes` crate as a backend
+
+use crate::aes_cipher;
 use aes::cipher::BlockSizeUser;
 use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
 use aes::{Aes128, Aes192, Aes256};
 use arrayref::array_ref;
-use crate::aes_cipher;
 // !!
 // !! WARNING! THIS CODE HAS *NOT* BEEN INDEPENDENTLY VERIFIED.
 // !! IT RELIES ON THE `aes` CRATE TO DO THE ACTUAL CIPHER, WHICH HAS BEEN AUDITED.
@@ -13,15 +15,21 @@ aes_cipher!(AES128Cipher, Aes128, 16);
 aes_cipher!(AES192Cipher, Aes192, 24);
 aes_cipher!(AES256Cipher, Aes256, 32);
 
+// aes_cipher!
+/// This macro is used to generate the AES???Cipher structs. It is not useful otherwise.
 #[macro_export]
 macro_rules! aes_cipher {
     ($struct_name:ident,$crypto_backend:tt,$ks:expr) => {
+        /// A wrapper around a bare AES construct.
         pub struct $struct_name {
             key: [u8; $ks],
             bs: usize,
         }
 
         impl $struct_name {
+            // new
+            /// Given a fixed-size array containing a key, create a new AES construct.
+            //
             pub fn new(key: [u8; $ks]) -> Self {
                 Self {
                     key,
@@ -29,6 +37,9 @@ macro_rules! aes_cipher {
                 }
             }
 
+            // encrypt
+            /// Given an array of data, encrypt it and return the result as a byte vector.
+            //
             pub fn encrypt(self: &mut $struct_name, data: &[u8]) -> Vec<u8> {
                 let mut dvec = data.to_vec();
                 self.pad(&mut dvec);
@@ -44,6 +55,9 @@ macro_rules! aes_cipher {
                 encrypted
             }
 
+            // decrypt
+            /// Given an array of data, decrypt it and return the result as a byte vector.
+            //
             pub fn decrypt(self: &mut $struct_name, data: &[u8]) -> Vec<u8> {
                 let cipher = <$crypto_backend>::new(&GenericArray::from(self.key));
                 let mut decrypted: Vec<u8> = vec![];
@@ -57,6 +71,10 @@ macro_rules! aes_cipher {
                 self.unpad(decrypted)
             }
 
+            // pad
+            /// Apply PKCS#7 padding to the given data vector to extend it to the required block size.
+            /// This will mutate **the original vector** and will not return anything.
+            //
             fn pad(self: &$struct_name, data: &mut Vec<u8>) {
                 // Explaination:
                 // Determine the amount of padding required to get to the required block size (self.bs),
@@ -73,6 +91,10 @@ macro_rules! aes_cipher {
                 data.append(&mut pad_array);
             }
 
+            // unpad
+            /// Remove PKCS#7 padding from a given data vector.
+            /// This does not mutate the original vector, and instead returns a new one.
+            //
             fn unpad(self: &$struct_name, data: Vec<u8>) -> Vec<u8> {
                 // Explaination:
                 // The `pad` function above uses the amount of padding converted to a char

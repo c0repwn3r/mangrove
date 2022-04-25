@@ -1,11 +1,12 @@
+//! # Structs and functions for dealing with Repositories
+
 use serde::{Deserialize, Serialize};
 use version::Version;
 
 use crate::{pkg::Package, platform::Architecture, crypt::PublicKey};
 
 // Repository
-// Contains all data the package manager knows about a repository
-// !! this is not serializable, see RepoInfo and RepoData for the actual contents of a repo
+/// Contains all data the package manager knows about a repository
 //
 pub struct Repository {
     pub repo_name: String,
@@ -16,7 +17,7 @@ pub struct Repository {
 }
 
 // RepoInfo
-// Contains information on a repository
+/// Contains information on a repository
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepoInfo {
@@ -26,7 +27,7 @@ pub struct RepoInfo {
 }
 
 // RepoData
-// Contains information on the packages contained within a repository
+/// Contains information on the packages contained within a repository
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepoData {
@@ -35,7 +36,7 @@ pub struct RepoData {
 }
 
 // RepoPackage
-// Contains information on a single package contained within a repository
+/// Contains information on a single package contained within a repository
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RepoPackage {
