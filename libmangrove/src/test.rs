@@ -9,12 +9,13 @@ mod tests {
         crypt::{decrypt_package, encrypt_package, PrivateKey},
         file::FileOps,
         pkg::{
-            save_package, FileMetadata, Package, PackageContents, PackageFile, PackageFolder,
-            PackageLink, PkgSpec,
+            save_package, save_package_signed, FileMetadata, Package, PackageContents, PackageFile,
+            PackageFolder, PackageLink, PkgSpec,
         },
         platform::Architecture,
         repo::RepoPackage,
     };
+    use serial_test::serial;
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
     fn get_test_package() -> Package {
@@ -242,6 +243,7 @@ mod tests {
     }
 
     #[test]
+    #[serial] // If run concurrently with package_saving_signed, will fail
     fn package_saving() {
         match save_package(
             get_test_package(),
@@ -251,6 +253,19 @@ mod tests {
             Err(err) => {
                 panic!("{}", err);
             }
+        }
+    }
+
+    #[test]
+    #[serial] // If run concurrently with package_saving, will fail
+    fn package_saving_signed() {
+        match save_package_signed(
+            get_test_package(),
+            "/home/core/prj/personal/mangrove/test/test-package".to_string(),
+            PrivateKey::generate("testkey".to_string()),
+        ) {
+            Ok(_) => (),
+            Err(err) => panic!("{}", err),
         }
     }
 

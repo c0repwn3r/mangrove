@@ -7,7 +7,7 @@ use uuid::Uuid;
 use zstd::stream::copy_encode;
 
 use crate::{
-    crypt::mcrypt_sha256_verify_file,
+    crypt::{mcrypt_sha256_verify_file, PrivateKey, encrypt_package},
     file::{get_cwd, set_cwd, FileOps},
     platform::{arch_str, Architecture}
 };
@@ -121,10 +121,9 @@ macro_rules! version_any {
     };
 }
 
-// save_package
-/// Given a Package and a data_dir, use the files contained in the data_dir to build an unsigned .mgve package
+// save_package_backend
 //
-pub fn save_package(package: Package, data_dir: String) -> Result<String, String> {
+fn save_package_backend(package: Package, data_dir: String, signing_key: Option<PrivateKey>) -> Result<String, String> {
     // Step 1: Create temporary dir
     let random_identifier: String = Uuid::new_v4().to_string(); // Get a random uuidv4
     let root_prefix: String = "/tmp/mangrove_build_".to_string(); // prefix
@@ -177,7 +176,6 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
         // Files need to be copied
         for file in files {
             let orig = format!("{}{}", data_dir, &file.name);
-            println!("{}", orig);
             // Validate sha256 first, reject if invalid
             let e = mcrypt_sha256_verify_file(&orig, &file.sha256);
             match e {
@@ -261,6 +259,25 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
         Err(err) => return Err(format!("Failed to remove temporary file: {}", err)),
     }
 
+    match signing_key {
+        None => return Ok(archive_path),
+        Some(_) => ()
+    }
+
+    // Signing is required
+    let dat: Vec<u8> = match fs::read(&archive_path) {
+        Ok(dat) => dat,
+        Err(err) => return Err(format!("Failed to read file: {}", err))
+    };
+    let enc_res = match encrypt_package(&signing_key.unwrap(), &dat) {
+        Ok(vec) => vec,
+        Err(err) => return Err(format!("Failed to encrypt package: {}", err))
+    };
+    match fs::write(&archive_path, enc_res) {
+        Ok(_) => (),
+        Err(err) => return Err(format!("Failed to write to file: {}", err))
+    }
+
     Ok(archive_path)
 }
 
@@ -271,4 +288,18 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
 pub enum PackageType {
     UnsignedPackage,
     SignedPackage
+}
+
+// save_package
+/// Given a Package and a data_dir, use the files contained in the data_dir to build an unsigned .mgve package
+//
+pub fn save_package(package: Package, data_dir: String) -> Result<String, String> {
+    save_package_backend(package, data_dir, None)
+}
+
+// save_package_signed
+/// Given a Package and a data_dir, use the files contained in the data_dir to build a signed package
+//
+pub fn save_package_signed(package: Package, data_dir: String, signing_key: PrivateKey) -> Result<String, String> {
+    save_package_backend(package, data_dir, Some(signing_key))
 }
