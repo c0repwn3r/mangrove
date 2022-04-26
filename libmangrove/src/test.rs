@@ -2,7 +2,7 @@
 //! This module contains the libmangrove test suite. It does nothing useful otherwise.
 
 #[cfg(test)]
-mod tests {
+mod libmangrove_tests {
 
     use crate::{
         aes::{AES128Cipher, AES192Cipher, AES256Cipher},
@@ -13,7 +13,7 @@ mod tests {
             PackageFolder, PackageLink, PkgSpec,
         },
         platform::Architecture,
-        repo::RepoPackage,
+        repo::RepoPackage, lock::{lock_repository, lock_trustcache, lock_packages},
     };
     use serial_test::serial;
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
@@ -315,5 +315,48 @@ mod tests {
             Err(err) => panic!("{}", err),
         };
         assert_eq!(pkg, decrypted);
+    }
+
+    #[test]
+    #[serial]
+    fn repository_locking() {
+        let lock = lock_repository().unwrap();
+        lock.release().unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn repository_locking_already_locked() {
+        let lock = lock_repository().unwrap();
+        assert!(lock_repository().is_err());
+        lock.release().unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn trustcache_locking() {
+        let lock = lock_trustcache().unwrap();
+        lock.release().unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn trustcache_locking_already_locked() {
+        let lock = lock_trustcache().unwrap();
+        assert!(lock_trustcache().is_err());
+        lock.release().unwrap();
+    }
+
+    #[test]
+    fn package_locking() {
+        let lock = lock_packages().unwrap();
+        lock.release().unwrap();
+    }
+
+    #[test]
+    fn package_locking_already_locked() {
+        let lock = lock_packages().unwrap();
+        assert!(lock_packages().is_err());
+        lock.release().unwrap();
     }
 }

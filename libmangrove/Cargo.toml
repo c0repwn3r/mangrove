@@ -19,6 +19,7 @@ zstd = "0.11.1"
 aes = "0.8.1"
 arrayref = "0.3.6"
 serial_test = "0.6.0"
+lockfile = "0.3.0"
 
 [dependencies.ed25519-dalek]
 version = "1"
