@@ -348,12 +348,14 @@ mod libmangrove_tests {
     }
 
     #[test]
+    #[serial]
     fn package_locking() {
         let lock = lock_packages().unwrap();
         lock.release().unwrap();
     }
 
     #[test]
+    #[serial]
     fn package_locking_already_locked() {
         let lock = lock_packages().unwrap();
         assert!(lock_packages().is_err());
