@@ -3,7 +3,7 @@ name: default
 
 steps:
 - name: tests
-  image: rust:nightly
+  image: rustlang/rust:nightly
   commands:
   - cargo build --verbose --all
   - cargo test --verbose --all
