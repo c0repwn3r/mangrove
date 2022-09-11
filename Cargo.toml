@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "libmangrove",
-    "mangrove-cli/mangrove-create"
+    "mangrove-cli/mangrove-create",
+    "mangrove-cli/mangrove-inspect"
 ]

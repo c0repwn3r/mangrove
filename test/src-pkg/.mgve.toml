@@ -1,4 +1,3 @@
-[package]
 pkgname = "test"
 pkgver = "0.0.1"
 shortdesc = "A test package, used in Mangrove unit tests"
@@ -6,16 +5,16 @@ longdesc = "A test package, used in Mangrove unit tests"
 arch = "amd64"
 url = "https://mgve.cc"
 license = "GNU-GPL-3-or-later"
+depends = [{pkgname = "test-data", version = "*"}, {pkgname = "test-data-2", version = "0.0.0"}]
 groups = ["thisisgroup1", "thisisgroup2"]
-depends = ["test-data", "test-data-2=0.0.0"]
 optdepends = ["test-opt: for doing something else"]
 provides = [
-    "other-package"
+    { pkgname = "other-package", version = "*" }
 ]
 conflicts = [
-    "conflicting-package"
+    { pkgname = "conflicting-package", version = "*" }
 ]
 replaces = [
-    "old-package"
+    { pkgname = "old-package", version = "*" }
 ]
 # Installed size calculated automatically by filesize

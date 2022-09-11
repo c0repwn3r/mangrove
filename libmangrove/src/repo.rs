@@ -38,7 +38,7 @@ pub struct RepoData {
 // RepoPackage
 /// Contains information on a single package contained within a repository
 //
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct RepoPackage {
     pub package_data: Package,
     pub avaliable_versions: Vec<Version>,

@@ -1,10 +1,10 @@
 [package]
-name = "mangrove-create"
+name = "mangrove-inspect"
 version = "0.1.0"
 authors = ["c0repwn3r"]
 edition = "2021"
-description = "Create and build packages for the Mangrove package manager"
-documentation = "https://docs.mgve.cc/cli/mangrove-create"
+description = "Inspect a Mangrove package and get information about it"
+documentation = "https://docs.mgve.cc/cli/mangrove-inspect"
 repository = "https//mgve.cc/git"
 license = "GPL-3.0-or-later"
 
@@ -14,6 +14,3 @@ license = "GPL-3.0-or-later"
 libmangrove = { version = "0.1.0", path = "../../libmangrove/", package = "libmangrove" }
 clap = { version = "3.1.10", features = ["derive", "cargo", "suggestions"] }
 clap_complete = "3.1.2"
-toml = "0.5.9"
-version = { version = "1.0.7", features = ["serde"], package="semver" }
-serde = { version = "1.0.142", features = ["derive"] }

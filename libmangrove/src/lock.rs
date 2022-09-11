@@ -11,36 +11,46 @@ Trustcache operations - /etc/mangrove/locks/trustcache.lock
 Package operations    - /etc/mangrove/locks/package.lock
 */
 
-pub fn lock_repository() -> Result<Lockfile, String> {
+pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, String> {
     match ensure_config() {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
-    let lock = match Lockfile::create("/etc/mangrove/locks/repo.lock") {
+
+    let path = if use_local_lockfile {"repo.lock"} else {"/etc/mangrove/locks/repo.lock"};
+
+    let lock = match Lockfile::create(path) {
         Ok(l) => l,
         Err(_) => return Err("Locked by another process".to_string()),
     };
 
     Ok(lock)
 }
-pub fn lock_trustcache() -> Result<Lockfile, String> {
+pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, String> {
     match ensure_config() {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
-    let lock = match Lockfile::create("/etc/mangrove/locks/trustcache.lock") {
+
+    let path = if use_local_lockfile {"trustcache.lock"} else {"/etc/mangrove/locks/trustcache.lock"};
+
+    let lock = match Lockfile::create(path) {
         Ok(l) => l,
         Err(_) => return Err("Locked by another process".to_string()),
     };
 
     Ok(lock)
 }
-pub fn lock_packages() -> Result<Lockfile, String> {
+pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, String> {
     match ensure_config() {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
-    let lock = match Lockfile::create("/etc/mangrove/locks/package.lock") {
+
+    let path = if use_local_lockfile {"package.lock"} else {"/etc/mangrove/locks/package.lock"};
+
+
+    let lock = match Lockfile::create(path) {
         Ok(l) => l,
         Err(_) => return Err("Locked by another process".to_string()),
     };

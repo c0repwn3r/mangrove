@@ -1,6 +1,6 @@
 //! # Structs and functions for dealing with Packages
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use tar::Builder;
 use uuid::Uuid;
@@ -32,7 +32,7 @@ pub struct Package {
     pub provides: Option<Vec<PkgSpec>>,  // Provides: List of PkgSpec (optional)
     pub conflicts: Option<Vec<PkgSpec>>, // Conflicts: List of PkgSpec (optional)
     pub replaces: Option<Vec<PkgSpec>>,  // Replaces: List of PkgSpec (optional)
-    pub installed_size: u64,             // Installed Size: integer (required)
+    pub installed_size: usize,           // Installed Size: integer (required)
     pub pkgcontents: PackageContents,    // Package Contents: PackageContents (required)
 }
 
@@ -74,7 +74,7 @@ pub struct PackageContents {
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageFolder {
     pub name: String,
-    pub mtime: i32,
+    pub mtime: usize,
     pub installpath: String,
     pub meta: FileMetadata,
 }
@@ -87,7 +87,7 @@ pub struct PackageFile {
     pub name: String,
     pub sha256: String,
     pub meta: FileMetadata,
-    pub mtime: i32,
+    pub mtime: usize,
     pub installpath: String,
 }
 
@@ -97,7 +97,7 @@ pub struct PackageFile {
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PackageLink {
     pub file: String,
-    pub mtime: i32,
+    pub mtime: usize,
     pub target: String,
 }
 
@@ -106,9 +106,9 @@ pub struct PackageLink {
 //
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct FileMetadata {
-    pub owner: i32,
-    pub group: i32,
-    pub permissions: i32,
+    pub owner: usize,
+    pub group: usize,
+    pub permissions: usize,
 }
 
 /// Utility macro for VersionReq { comparators: vec![] } because VersionReq::any() is dumb
@@ -244,7 +244,7 @@ fn save_package_backend(package: Package, data_dir: String, signing_key: Option<
     // Step 9: Compress file
     let uncompressed_istream = match File::open(&archive_path_uncompressed) {
         Ok(ptr) => ptr,
-        Err(err) => return Err(format!("Failed to open file for reading: {}", err)),
+        Err(err) => return Err(format!("Compress: Failed to open file {} for reading: {}", &archive_path_uncompressed, err)),
     };
     let compressed_ostream = match File::create(&archive_path) {
         Ok(ptr) => ptr,

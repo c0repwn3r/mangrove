@@ -7,9 +7,12 @@ use serde::{Deserialize, Serialize};
 //
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Architecture {
-    Amd64,
-    Arm64,
-    Armv7,
+    #[allow(non_camel_case_types)]
+    amd64,
+    #[allow(non_camel_case_types)]
+    arm64,
+    #[allow(non_camel_case_types)]
+    armv7,
 }
 
 // arch_str
@@ -17,8 +20,8 @@ pub enum Architecture {
 //
 pub fn arch_str(arch: &Architecture) -> String {
     match arch {
-        Architecture::Amd64 => "amd64".to_string(),
-        Architecture::Arm64 => "arm64".to_string(),
-        Architecture::Armv7 => "armv7".to_string(),
+        Architecture::amd64 => "amd64".to_string(),
+        Architecture::arm64 => "arm64".to_string(),
+        Architecture::armv7 => "armv7".to_string(),
     }
 }
