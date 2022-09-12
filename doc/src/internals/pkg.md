@@ -126,10 +126,83 @@ pub permissions: usize,
 
 For non-programmers, here is a convenient table representing the entire pkginfo file:
 
-| Field     | Optional | Type    | Description                         | Example                                      |
-|-----------|----------|---------|-------------------------------------|----------------------------------------------|
-| pkgname   | no       | String  | The name of the package             | test                                         |
-| pkgver    | no       | Version | The version of the package          | 0.1.1                                        |
-| shortdesc | no       | String  | A short description of the package  | Says hello.                                  |
-| longdesc  | yes      | String  | A longer description of the package | It says hello when you run the hello binary. |
-| arch      | yes      |         |                                     |                                              |
+| Field          | Optional | Type            | Description                                                                                                                           | Example                                      |
+|----------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| pkgname        | no       | String          | The name of the package                                                                                                               | test                                         |
+| pkgver         | no       | Version         | The version of the package                                                                                                            | 0.1.1                                        |
+| shortdesc      | no       | String          | A short description of the package                                                                                                    | Says hello.                                  |
+| longdesc       | yes      | String          | A longer description of the package                                                                                                   | It says hello when you run the hello binary. |
+| arch           | no       | Architecture    | The architecture of the package                                                                                                       | amd64                                        |
+| url            | yes      | String          | An optional URL to the homepage of this package                                                                                       | https://mgve.cc                              |
+| license        | yes      | String          | The SPDX license identifier of the package                                                                                            | GNU-GPL-3.0-or-later                         |
+| groups         | yes      | Vec<String>     | A list of groups this package is a part of.                                                                                           | ["group1", "group2"]                         |
+| depends        | yes      | Vec<PkgSpec>    | A list of packages that this package depends on.                                                                                      | ["other-package>=1.0.0"]                     |
+| optdepends     | yes      | Vec<PkgSpec>    | A list of packages that this package optionally depends on.                                                                           | ["optional-package>=1.0.0"]                  |
+| provides       | yes      | Vec<PkgSpec>    | A list of other packages that this package provides the funtionality of. Generally, this means it has the same binaries or libraries. | ["other-package"]                            |
+| conflicts      | yes      | Vec<PkgSpec>    | A list of other packages that this package cannot be installed alongside.                                                             | ["bad-package"]                              |
+| replaces       | yes      | Vec<PkgSpec>    | A list of other packages that this package replaces.                                                                                  | ["old-package"]                              |
+| installed_size | no       | usize           | The total installed size of this package.                                                                                             | 16387                                        |
+| pkgcontents    | no       | PackageContents | An enumeration of the contents of this package, their permissions, and where they should be installed to.                             | See below.                                   |
+
+`pkgcontents` is a instance of `PackageContents`, which is just an enumeration of the package's contents.
+
+Here's the Rust definition:
+
+<details>
+    <summary>Rust definition</summary>
+
+```rust
+// PackageContents
+/// Represents the contents of a package
+//
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct PackageContents {
+    pub folders: Option<Vec<PackageFolder>>,
+    pub files: Option<Vec<PackageFile>>,
+    pub links: Option<Vec<PackageLink>>,
+}
+
+// PackageFolder
+/// Represents a folder a package creates, and its metadata
+//
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct PackageFolder {
+    pub name: String,
+    pub mtime: usize,
+    pub installpath: String,
+    pub meta: FileMetadata,
+}
+
+// PackageFile
+/// Represents a file inside a package, and its metadata
+//
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct PackageFile {
+    pub name: String,
+    pub sha256: String,
+    pub meta: FileMetadata,
+    pub mtime: usize,
+    pub installpath: String,
+}
+
+// PackageLink
+/// Represents a symbolic link that should be created by a package, and its metadata
+//
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct PackageLink {
+    pub file: String,
+    pub mtime: usize,
+    pub target: String,
+}
+
+// FileMetadata
+/// Represents metadata on a file or folder
+//
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct FileMetadata {
+    pub owner: usize,
+    pub group: usize,
+    pub permissions: usize,
+}
+```
+</details>
