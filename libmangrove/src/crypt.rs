@@ -294,3 +294,41 @@ pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
     result += "== End Package Dump ==";
     return result;
 }
+
+// is_signed_package
+/// Determine if the provided data array has the correct structure of a package in the Signed Package Format.
+/// Does not perform signature checks.
+//
+pub fn is_signed_package(data: Vec<u8>) -> bool {
+    // Check for the magic
+    if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
+        return false;
+    }
+    let s_len = data[4] as usize;
+    // Get signature bytes
+    let s_dat = &data[5..5 + s_len];
+
+    if data[5 + s_len] != 0x0u8 {
+        return false;
+    }
+    // Derive key from signature
+    let raw_key = mcrypt_sha256_raw(s_dat);
+    let key = array_ref!(raw_key, 0, 32);
+    let mut cipher = AES256Cipher::new(*key);
+    let d_len = u32::from_be_bytes(*array_ref!(data[6 + s_len..10 + s_len], 0, 4)) as usize;
+    let d_dat = &data[10 + s_len..10 + s_len + d_len];
+    // Validate package data
+    if data[10 + s_len + d_len] != 0x42u8 || data[data.len() - 1] != 0x42u8 {
+        return false;
+    }
+    // Package meets the proper structure
+    // Validate digital signature
+    match Signature::from_bytes(s_dat) {
+        Ok(sig) => sig,
+        Err(_) => {
+            return false;
+        },
+    };
+    true
+}
+

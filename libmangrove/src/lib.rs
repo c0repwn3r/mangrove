@@ -5,6 +5,8 @@
 //! Looking for the CLI? Check out mangrove-cli.
 //!
 
+extern crate core;
+
 pub mod crypt; // Various cryptographic helper functions to remove repetitive code
 pub mod db; // Package database
 pub mod file; // Traits, structs, and functions for interfacing with the filesystem

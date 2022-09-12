@@ -1,10 +1,10 @@
-use clap::{arg, Command, crate_authors, crate_name, crate_version};
+use clap::{arg, Command, crate_authors, crate_description, crate_name, crate_version};
 
 pub fn get_command() -> Command<'static> {
     Command::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
-        .about(crate_authors!())
+        .about(crate_description!())
         .propagate_version(true)
         .subcommand_required(true)
         .arg_required_else_help(true)
