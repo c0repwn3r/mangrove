@@ -16,4 +16,4 @@ There can be an unlimited number of actions within one transaction, with a few e
 
 - Mangrove must update itself in a seperate transaction (a transaction containing only a single `install` action)
 - All operations are mutually exclusive - i.e. you cannot `install` and `update` the same package in one transaction
-- A package cannot be operated on if it has been locked.
+- A package cannot be operated on if it has been [locked](cli/locking_packages.md) - it must first be unlocked

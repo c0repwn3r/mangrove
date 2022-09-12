@@ -4,7 +4,7 @@ Mangrove uses a custom packaging system that is designed to meet the Mangrove de
 
 - the inner working of the package manager should be hidden to the average user
 - it should be _fast_ - everything should be build for speed
-- it should be cross-platform - it should work on all Unix-based operating systems [(about windows compatability)](internals/windows.md)
+- it should be cross-platform - it should work on \*nix, macOS, and Windows
 - it should be free and open source for anyone to audit or modify as needed
 - minimum system requirements should be as low as possible
 
