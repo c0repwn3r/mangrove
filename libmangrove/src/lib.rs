@@ -4,6 +4,7 @@
 //! **It does not implement the CLI, it is merely the library to perform the actual packaging operations.**
 //! Looking for the CLI? Check out mangrove-cli.
 //!
+#[deny(missing_docs)]
 
 extern crate core;
 

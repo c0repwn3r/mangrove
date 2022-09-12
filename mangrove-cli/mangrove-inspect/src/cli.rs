@@ -7,7 +7,6 @@ pub fn get_command() -> Command<'static> {
         .author(crate_authors!())
         .about(crate_description!())
         .propagate_version(true)
-        .subcommand_required(true)
         .arg_required_else_help(true)
         .arg(arg!(<package>).value_parser(clap::value_parser!(PathBuf)))
 }

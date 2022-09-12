@@ -209,7 +209,7 @@ fn save_package_backend(package: Package, data_dir: String, signing_key: Option<
     let archive_path = format!("{}/{}", &data_dir, get_pkg_filename(&package));
     let tar_archive_bare = match File::create(&archive_path_uncompressed) {
         Ok(ptr) => ptr,
-        Err(err) => return Err(format!("Failed to open file for writing: {}", err)),
+        Err(err) => return Err(format!("Failed to open file ({}) for writing: {}", &archive_path_uncompressed, err)),
     };
     let mut tar = Builder::new(tar_archive_bare);
     if need_files {

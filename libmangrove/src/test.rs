@@ -5,6 +5,8 @@ use version::{Prerelease, Version, VersionReq};
 use crate::pkg::{Package, PackageContents, PackageFile, PackageFolder, PackageLink, PkgSpec};
 
 mod libmangrove_tests_common {
+    use std::env;
+    use libc::{gid_t, setgid, setuid, uid_t};
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
     use crate::pkg::{FileMetadata, Package, PackageContents, PackageFile, PackageFolder, PackageLink, PkgSpec};
     use crate::platform::Architecture;
@@ -129,7 +131,7 @@ mod libmangrove_tests_common {
 
 #[cfg(test)]
 mod libmangrove_pkg_tests {
-    use std::fs;
+    use std::{env, fs};
     use crate::crypt::{is_signed_package, PrivateKey};
     use crate::file::FileOps;
     use crate::pkg::{get_pkg_filename, Package, save_package, save_package_signed};
@@ -171,9 +173,10 @@ mod libmangrove_pkg_tests {
     #[test]
     #[serial] // If run concurrently with package_saving_signed, will fail
     fn package_saving() {
+        println!("{:?}", std::env::current_dir().unwrap());
         match save_package(
             get_test_package(),
-            "/home/core/prj/personal/mangrove/test/test-package".to_string(),
+            format!("{}/../test/test-package", std::env::current_dir().unwrap().to_str().unwrap()),
         ) {
             Ok(_) => (),
             Err(err) => {
@@ -187,7 +190,7 @@ mod libmangrove_pkg_tests {
     fn package_saving_signed() {
         match save_package_signed(
             get_test_package(),
-            "/home/core/prj/personal/mangrove/test/test-package".to_string(),
+            format!("{}/../test/test-package", std::env::current_dir().unwrap().to_str().unwrap()),
             PrivateKey::generate("testkey".to_string()),
         ) {
             Ok(_) => (),
@@ -200,24 +203,24 @@ mod libmangrove_pkg_tests {
     fn package_validating_signed() {
         match save_package_signed(
             get_test_package(),
-            "/home/core/prj/personal/mangrove/test/test-package".to_string(),
+            format!("{}/../test/test-package", std::env::current_dir().unwrap().to_str().unwrap()),
             PrivateKey::generate("testkey".to_string()),
         ) {
             Ok(_) => (),
             Err(err) => panic!("{}", err),
         };
-        let fname = format!("/home/core/prj/personal/mangrove/test/test-package/{}", get_pkg_filename(&get_test_package()));
+        let fname = format!("../test/test-package/{}", get_pkg_filename(&get_test_package()));
         let signed_package_data = fs::read(fname).unwrap();
         assert!(is_signed_package(signed_package_data));
     }
 
     #[test]
     fn package_fileops_load() {
-        match Package::to_file(&get_test_package(), "/home/core/prj/personal/mangrove/test/test_pkginfo".parse().unwrap()) {
+        match Package::to_file(&get_test_package(), "../test/test_pkginfo".parse().unwrap()) {
             Ok(_) => (),
             Err(e) => panic!("{}", e),
         };
-        let newpkg = match Package::from_file("/home/core/prj/personal/mangrove/test/test_pkginfo".parse().unwrap()) {
+        let newpkg = match Package::from_file("../test/test_pkginfo".parse().unwrap()) {
             Ok(p) => p,
             Err(e) => panic!("{}", e),
         };
@@ -233,7 +236,7 @@ mod libmangrove_pkg_tests {
     #[test]
     #[should_panic]
     fn package_fileops_load_not_a_real_package() {
-        Package::from_file("/home/core/prj/personal/mangrove/test/test-package/hello_world/helloworld".parse().unwrap()).unwrap();
+        Package::from_file("./test/test-package/hello_world/helloworld".parse().unwrap()).unwrap();
     }
 }
 
@@ -264,7 +267,7 @@ mod libmangrove_repopackage_tests {
 mod libmangrove_mcrypt_tests {
     use crate::aes::{AES128Cipher, AES192Cipher, AES256Cipher};
     use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, PrivateKey};
-    use crate::test::libmangrove_tests_common::get_test_package_bytes;
+    use crate::test::libmangrove_tests_common::{get_test_package_bytes};
 
     #[test]
     fn mcrypt_aes128() {
