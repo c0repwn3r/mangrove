@@ -5,6 +5,7 @@ use std::error::Error;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use std::io::{Cursor, Read};
+use std::ptr::hash;
 use tar::{Archive, Builder};
 use uuid::Uuid;
 use zstd::stream::copy_encode;
@@ -347,6 +348,13 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
     if pkginfo.is_none() {
         Err("Failed to find pkginfo file")?
     }
-    // TODO: Verify hashes
+    // Verify hashes
+    if pkginfo.as_ref().unwrap().pkgcontents.files.is_some() {
+        for file in pkginfo.as_ref().unwrap().pkgcontents.files.as_ref().unwrap() {
+            if hashes.get(&*file.name).unwrap() != &file.sha256 {
+                Err(format!("Fatal error: hash verification failed for {} (expected {} got {})", file.name, file.sha256, hashes.get(&*file.name).unwrap()))?
+            }
+        }
+    }
     Ok(pkginfo.unwrap())
 }
