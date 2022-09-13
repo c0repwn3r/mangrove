@@ -21,3 +21,4 @@ pub mod test; // Testing
 pub mod aes; // AES helper functions
 pub mod config; // Configuration
 pub mod lock; // Lockfiles
+pub mod trustcache; // Trustcache management

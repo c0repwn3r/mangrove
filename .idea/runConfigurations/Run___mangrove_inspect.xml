@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run | mangrove-inspect" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="run --package mangrove-inspect -- test_0.0.1_amd64.mgve -k LQaHiMmaBwE76yVoLubxtl5RKgG2blBrQkREWmtmgT8=" />
-    <option name="workingDirectory" value="file://$PROJECT_DIR$/test/test-package-signed" />
+    <option name="command" value="run --package mangrove-inspect -- test/test-package-signed/test_0.0.1_amd64.mgve -l" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
     <option name="allFeatures" value="false" />

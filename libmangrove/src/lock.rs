@@ -21,7 +21,7 @@ pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, String> {
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(_) => return Err("Locked by another process".to_string()),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
     };
 
     Ok(lock)
@@ -36,7 +36,7 @@ pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, String> {
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(_) => return Err("Locked by another process".to_string()),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
     };
 
     Ok(lock)
@@ -52,7 +52,7 @@ pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, String> {
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(_) => return Err("Locked by another process".to_string()),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
     };
 
     Ok(lock)

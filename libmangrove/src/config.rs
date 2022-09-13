@@ -7,7 +7,6 @@ use std::fs::create_dir_all;
 // /etc/mangrove/locks      - lockfiles
 // /etc/mangrove/repos      - repositories
 // /etc/mangrove/trust.toml - trust settings
-// /etc/mangrove/trust/     - trustcache
 
 pub fn ensure_config() -> Result<(), String> {
     match create_dir_all("/etc/mangrove") {
@@ -22,9 +21,13 @@ pub fn ensure_config() -> Result<(), String> {
         Ok(_) => (),
         Err(err) => return Err(format!("{}", err)),
     }
-    match create_dir_all("/etc/mangrove/trust") {
-        Ok(_) => (),
-        Err(err) => return Err(format!("{}", err)),
-    }
     Ok(())
+}
+
+pub fn get_trustcache_file(local: bool) -> String {
+    if local {
+        "./trust.toml".to_string()
+    } else {
+        "/etc/mangrove/trust.toml".to_string()
+    }
 }

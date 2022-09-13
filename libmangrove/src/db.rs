@@ -34,6 +34,9 @@ pub struct DbRepository {
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct KeyDb {
-    pub pubkeys: Vec<PublicKey>,
-    pub privkeys: Vec<PrivateKey>,
+    pub known_pubkeys: Vec<String>,
+    pub known_privkeys: Vec<String>,
+
+    pub deny_pubkeys: Vec<String>,
+    pub deny_privkeys: Vec<String>
 }

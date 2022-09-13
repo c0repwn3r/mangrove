@@ -406,3 +406,16 @@ mod libmangrove_lockfile_tests {
         lock.release().unwrap();
     }
 }
+
+#[cfg(test)]
+mod libmangrove_database_tests {
+    use crate::trustcache::{trustcache_load, trustcache_save};
+    use serial_test::serial;
+
+    #[test]
+    #[serial]
+    fn trustcache() {
+        let trustcache = trustcache_load(true).unwrap();
+        trustcache_save(trustcache, true).unwrap();
+    }
+}

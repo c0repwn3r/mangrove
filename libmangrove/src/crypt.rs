@@ -9,6 +9,7 @@ use std::{fs::File, io};
 use std::error::Error;
 
 use crate::aes::AES256Cipher;
+use crate::trustcache::Trustcache;
 
 // mcrypt_sha256_file
 /// Get the sha256 hash of the given file
@@ -359,4 +360,34 @@ pub fn is_signed_package(data: Vec<u8>) -> bool {
         },
     };
     true
+}
+
+// find_key
+/// Try every public key in the trustcache against the provided SPF data and try to find the key it is encrypted with.
+//
+pub fn find_key(data: &Vec<u8>, trustcache: &Trustcache) -> Option<PublicKey> {
+    // try known public keys
+    for key in &trustcache.keydb.known_pubkeys {
+        // load __anonymous__ key
+        let pk = match PublicKey::from_anonymous(key.to_owned()) {
+            Ok(k) => k,
+            Err(_) => return None
+        };
+        if decrypt_package(&pk, data.clone()).is_ok() {
+            return Some(pk);
+        }
+    }
+    // try known private keys
+    for key in &trustcache.keydb.known_privkeys {
+        // load __anonymous__ key
+        let sk = match PrivateKey::from_anonymous(key.to_owned()) {
+            Ok(k) => k,
+            Err(_) => return None
+        };
+        let pk = sk.derive();
+        if decrypt_package(&pk, data.clone()).is_ok() {
+            return Some(pk);
+        }
+    }
+    None
 }
