@@ -1,5 +1,6 @@
 //! # Structs and functions for dealing with Packages
 
+use std::collections::HashMap;
 use std::error::Error;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
@@ -14,6 +15,8 @@ use crate::{
     platform::{arch_str, Architecture}
 };
 use version::{Version, VersionReq};
+use zstd::Decoder;
+use crate::crypt::mcrypt_sha256_raw;
 
 //
 // Package
@@ -311,28 +314,39 @@ pub fn save_package_signed(package: Package, data_dir: String, signing_key: Priv
 /// WILL NOT DECRYPT! You need to use is_signed_package and decrypt_package first.
 //
 pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
-    let mut archive = Archive::new(Cursor::new(data));
+    let mut archive = Archive::new(Decoder::new(Cursor::new(data))?);
     // Pull out pkginfo
     let entries = archive.entries()?;
     let mut pkginfo: Option<Package> = None;
+    let mut hashes: HashMap<String, String> = HashMap::new();
     for raw_entry in entries {
         let mut entry = raw_entry?;
-        if match entry.path()?.file_name() {
+        let fname = match entry.path()?.file_name() {
             Some(p) => match p.to_str() {
                 Some(s) => s.to_string(),
                 None => Err("Failed to convert string")?
             },
             None => Err("Failed to get entry path".to_string())?
-        } == "pkginfo" {
+        };
+        if fname == "pkginfo" {
             // found pkginfo file!
             let mut pkinfo: Vec<u8> = vec![];
             entry.read_to_end(&mut pkinfo)?;
             pkginfo = Some(rmp_serde::from_slice(&*pkinfo)?);
-            break;
+        } else {
+            let mut fdat: Vec<u8> = vec![];
+            entry.read_to_end(&mut fdat)?;
+            hashes.insert(format!("/{}", match entry.path()?.to_str() {
+                Some(f) => f,
+                None => {
+                    Err("Failed to convert string")?
+                }
+            }), hex::encode(mcrypt_sha256_raw(&fdat[..])));
         }
     }
-    if pkginfo.is_some() {
+    if pkginfo.is_none() {
         Err("Failed to find pkginfo file")?
     }
+    // TODO: Verify hashes
     Ok(pkginfo.unwrap())
 }
