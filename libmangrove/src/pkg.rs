@@ -2,11 +2,10 @@
 
 use std::collections::HashMap;
 use std::error::Error;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use std::io::{Cursor, Read};
-use std::ptr::hash;
 use tar::{Archive, Builder};
 use uuid::Uuid;
 use zstd::stream::copy_encode;

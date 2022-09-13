@@ -1,8 +1,8 @@
-use std::{fs, io};
+use std::fs;
 use std::error::Error;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 use libmangrove::crypt::mcrypt_sha256_file;
 use libmangrove::pkg::{FileMetadata, Package, PackageContents, PackageFile, PackageFolder, PackageLink, save_package};
 use crate::BuildConfig;
@@ -46,7 +46,7 @@ pub fn get_pkgcontents(dir: &Path, cut: bool, root: &Path) -> Result<BuiltPackag
                         permissions: path.metadata().unwrap().permissions().mode() as usize
                     }
                 });
-                let mut res = get_pkgcontents(&path, false, root).expect("recursive call failed");
+                let res = get_pkgcontents(&path, false, root).expect("recursive call failed");
                 result.size += res.size;
                 if res.pkgcontents.links.is_some() {
                     result.pkgcontents.links.as_mut().unwrap().append(&mut res.pkgcontents.links.unwrap());
@@ -97,7 +97,7 @@ pub fn get_pkgcontents(dir: &Path, cut: bool, root: &Path) -> Result<BuiltPackag
     Ok(result)
 }
 
-pub fn build(config: BuildConfig, dryrun: bool) {
+pub fn build(config: BuildConfig) {
     // convert to Package
     let contents = match get_pkgcontents(Path::new("."), true, Path::new(".")) {
         Ok(c) => c,

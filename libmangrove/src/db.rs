@@ -6,7 +6,7 @@ extern crate ed25519_dalek;
 
 use crate::{
     pkg::Package,
-    repo::{RepoData, RepoInfo}, crypt::{PublicKey, PrivateKey},
+    repo::{RepoData, RepoInfo}, crypt::{PublicKey},
 };
 
 // Database

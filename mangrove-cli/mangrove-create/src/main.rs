@@ -21,7 +21,6 @@ fn main() {
             println!("Init {:?}", _s_args.value_of("directory").unwrap());
         }
         Some(("build", _s_args)) => {
-            let dryrun: bool = _s_args.occurrences_of("dryrun") > 0;
             if !std::path::Path::new(".mgve.toml").exists() {
                 println!("error: .mgve.toml not found");
                 std::process::exit(2);
@@ -41,7 +40,7 @@ fn main() {
                 }
             };
             println!("building {}", buildtoml_name(&buildconfig));
-            build(buildconfig, dryrun);
+            build(buildconfig);
         }
 
         _ => unreachable!("Subcommand not found."),
