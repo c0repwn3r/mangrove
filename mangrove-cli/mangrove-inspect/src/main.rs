@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 use libmangrove::crypt::{debug_dump_package, decrypt_package, find_key, is_signed_package, PublicKey};
-use libmangrove::pkg::load_package;
+use libmangrove::pkg::{dump_package, load_package};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
 use crate::cli::get_command;
 
@@ -74,5 +74,11 @@ fn main() {
     } else {
         println!("Package Type: Unsigned");
     }
-    println!("{:?}", load_package(&package_data));
+    dump_package(&match load_package(&package_data) {
+        Ok(p) => p,
+        Err(e) => {
+            println!("err: failed to load package: {}", e);
+            std::process::exit(1);
+        }
+    });
 }

@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt::{Debug, Display};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use std::io::{Cursor, Read};
@@ -357,4 +358,36 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
         }
     }
     Ok(pkginfo.unwrap())
+}
+
+fn show_opt<T: Debug>(opt: Option<T>) -> String {
+    if opt.is_some() {
+        return format!("{:?}", opt.unwrap());
+    }
+    format!("Not provided")
+}
+
+// dump_pkg
+/// Dumps the provided Package object in a human-readable format
+//
+pub fn dump_package(pkg: &Package) {
+    println!("== Begin Package Dump ==");
+    println!("| Package Name: {}", pkg.pkgname);
+    println!("| Package Version: {}", pkg.pkgver);
+    println!("| Description: {}", pkg.shortdesc);
+    println!("| Long Description: {}", show_opt(pkg.longdesc.clone()));
+    println!("| Package Architecture: {}", arch_str(&pkg.arch));
+    println!("| URL: {}", show_opt(pkg.url.clone()));
+    println!("| License: {}", show_opt(pkg.license.clone()));
+    println!("| Groups: {}", show_opt(pkg.groups.clone()));
+    println!("| Dependencies: {}", show_opt(pkg.depends.as_ref()));
+    println!("| Optional Dependenies: {}", show_opt(pkg.optdepends.clone()));
+    println!("| Provides: {}", show_opt(pkg.provides.as_ref()));
+    println!("| Conflicts: {}", show_opt(pkg.conflicts.as_ref()));
+    println!("| Replaces: {}", show_opt(pkg.replaces.as_ref()));
+    println!("| Size: {}", pkg.installed_size);
+    println!("| Files: {}", show_opt(pkg.pkgcontents.files.as_ref()));
+    println!("| Folders: {}", show_opt(pkg.pkgcontents.folders.as_ref()));
+    println!("| Links: {}", show_opt(pkg.pkgcontents.links.as_ref()));
+    println!("== End Package Dump ==");
 }
