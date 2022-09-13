@@ -1,6 +1,6 @@
 //! # Structs and functions for dealing with Packages
 
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
 use tar::Builder;
 use uuid::Uuid;

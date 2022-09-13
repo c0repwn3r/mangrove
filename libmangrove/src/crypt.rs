@@ -6,6 +6,7 @@ use rand_dalek::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{fs::File, io};
+use std::error::Error;
 
 use crate::aes::AES256Cipher;
 
@@ -99,6 +100,38 @@ impl PrivateKey {
             name: self.name.clone(),
             key_data: self.key_data.public,
         }
+    }
+
+    // to_anonymous
+    /// Serialize this PrivateKey into a base64-encoded anonymous private key.
+    pub fn to_anonymous(&self) -> String {
+        base64::encode(&self.key_data.to_bytes())
+    }
+
+    // from_anonymous
+    /// Attempt to create a new PrivateKey from an anonymous base64-encoded private key.
+    pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
+        Ok(PrivateKey {
+            name: "__anonymous__".parse().unwrap(),
+            key_data: Keypair::from_bytes(&*base64::decode(anonymous)?)?
+        })
+    }
+}
+
+impl PublicKey {
+    // to_anonymous
+    /// Serialize this PublicKey into a base64-encoded anonymous public key.
+    pub fn to_anonymous(&self) -> String {
+        base64::encode(&self.key_data.to_bytes())
+    }
+
+    // from_anonymous
+    /// Attempt to create a new PublicKey from an anonymous base64-encoded public key.
+    pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
+        Ok(PublicKey {
+            name: "__anonymous__".parse().unwrap(),
+            key_data: VerifyingKey::from_bytes(&*base64::decode(anonymous)?)?
+        })
     }
 }
 
@@ -242,7 +275,7 @@ pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
     // Derive key from signature
     let raw_key = mcrypt_sha256_raw(s_dat);
     let key = array_ref!(raw_key, 0, 32);
-    result += &*format!("| Cipher Key: {:x?}", raw_key);
+    result += &*format!("| Cipher Key: {:x?}\n", raw_key);
     let mut cipher = AES256Cipher::new(*key);
     let d_len = u32::from_be_bytes(*array_ref!(data[6 + s_len..10 + s_len], 0, 4)) as usize;
     result += &*format!("| Encrypted Data Length: {d_len}\n");
@@ -312,11 +345,7 @@ pub fn is_signed_package(data: Vec<u8>) -> bool {
         return false;
     }
     // Derive key from signature
-    let raw_key = mcrypt_sha256_raw(s_dat);
-    let key = array_ref!(raw_key, 0, 32);
-    let mut cipher = AES256Cipher::new(*key);
     let d_len = u32::from_be_bytes(*array_ref!(data[6 + s_len..10 + s_len], 0, 4)) as usize;
-    let d_dat = &data[10 + s_len..10 + s_len + d_len];
     // Validate package data
     if data[10 + s_len + d_len] != 0x42u8 || data[data.len() - 1] != 0x42u8 {
         return false;
@@ -331,4 +360,3 @@ pub fn is_signed_package(data: Vec<u8>) -> bool {
     };
     true
 }
-
