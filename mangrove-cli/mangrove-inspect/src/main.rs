@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 use libmangrove::crypt::{debug_dump_package, decrypt_package, is_signed_package, PublicKey};
+use libmangrove::pkg::load_package;
 use crate::cli::get_command;
 
 mod cli;
@@ -49,4 +50,5 @@ fn main() {
     } else {
         println!("Package Type: Unsigned");
     }
+    println!("{:?}", load_package(&package_data));
 }

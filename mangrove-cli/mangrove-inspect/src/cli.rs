@@ -1,6 +1,5 @@
 use clap::{arg, Command, crate_authors, crate_description, crate_name, crate_version};
 use std::path::PathBuf;
-use libmangrove::crypt::PublicKey;
 
 pub fn get_command() -> Command<'static> {
     Command::new(crate_name!())

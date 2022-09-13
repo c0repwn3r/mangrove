@@ -1,8 +1,10 @@
 //! # Structs and functions for dealing with Packages
 
+use std::error::Error;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, create_dir_all, remove_dir_all, remove_file, File};
-use tar::Builder;
+use std::io::{Cursor, Read};
+use tar::{Archive, Builder};
 use uuid::Uuid;
 use zstd::stream::copy_encode;
 
@@ -302,4 +304,35 @@ pub fn save_package(package: Package, data_dir: String) -> Result<String, String
 //
 pub fn save_package_signed(package: Package, data_dir: String, signing_key: PrivateKey) -> Result<String, String> {
     save_package_backend(package, data_dir, Some(signing_key))
+}
+
+// load_package
+/// Given an arbitrary blob, attempt to load it as an **unencrypted!** Package.
+/// WILL NOT DECRYPT! You need to use is_signed_package and decrypt_package first.
+//
+pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
+    let mut archive = Archive::new(Cursor::new(data));
+    // Pull out pkginfo
+    let entries = archive.entries()?;
+    let mut pkginfo: Option<Package> = None;
+    for raw_entry in entries {
+        let mut entry = raw_entry?;
+        if match entry.path()?.file_name() {
+            Some(p) => match p.to_str() {
+                Some(s) => s.to_string(),
+                None => Err("Failed to convert string")?
+            },
+            None => Err("Failed to get entry path".to_string())?
+        } == "pkginfo" {
+            // found pkginfo file!
+            let mut pkinfo: Vec<u8> = vec![];
+            entry.read_to_end(&mut pkinfo)?;
+            pkginfo = Some(rmp_serde::from_slice(&*pkinfo)?);
+            break;
+        }
+    }
+    if pkginfo.is_some() {
+        Err("Failed to find pkginfo file")?
+    }
+    Ok(pkginfo.unwrap())
 }
