@@ -8,16 +8,16 @@ use std::fs::create_dir_all;
 // /etc/mangrove/repos      - repositories
 // /etc/mangrove/trust.toml - trust settings
 
-pub fn ensure_config() -> Result<(), String> {
-    match create_dir_all("/etc/mangrove") {
+pub fn ensure_config(local: bool) -> Result<(), String> {
+    match create_dir_all(if local {"./test/config/"} else {"/etc/mangrove"}) {
         Ok(_) => (),
         Err(err) => return Err(format!("{}", err)),
     }
-    match create_dir_all("/etc/mangrove/locks") {
+    match create_dir_all(if local {"./test/config/locks/"} else {"/etc/mangrove/locks/"}) {
         Ok(_) => (),
         Err(err) => return Err(format!("{}", err)),
     }
-    match create_dir_all("/etc/mangrove/repos") {
+    match create_dir_all(if local {"./test/config/repos/"} else {"/etc/mangrove/repos/"}) {
         Ok(_) => (),
         Err(err) => return Err(format!("{}", err)),
     }

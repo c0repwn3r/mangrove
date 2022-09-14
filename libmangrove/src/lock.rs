@@ -12,7 +12,7 @@ Package operations    - /etc/mangrove/locks/package.lock
 */
 
 pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config() {
+    match ensure_config(use_local_lockfile) {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
@@ -27,7 +27,7 @@ pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, String> {
     Ok(lock)
 }
 pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config() {
+    match ensure_config(use_local_lockfile) {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
@@ -42,7 +42,7 @@ pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, String> {
     Ok(lock)
 }
 pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config() {
+    match ensure_config(use_local_lockfile) {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
     }
