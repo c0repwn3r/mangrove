@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 use libmangrove::crypt::{debug_dump_package, decrypt_package, find_key, is_signed_package, PublicKey};
+use libmangrove::mwl_statement;
 use libmangrove::pkg::{dump_package, load_package};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
 use crate::cli::get_command;

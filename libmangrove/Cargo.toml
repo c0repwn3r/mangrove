@@ -22,6 +22,7 @@ serial_test = "0.6.0"
 lockfile = "0.3.0"
 base64 = "0.13.0"
 toml = "0.5.9"
+git-version = "0.3.5"
 
 [dependencies.ed25519-dalek]
 version = "1"

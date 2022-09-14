@@ -8,6 +8,8 @@
 
 extern crate core;
 
+use git_version::git_version;
+
 pub mod crypt; // Various cryptographic helper functions to remove repetitive code
 pub mod db; // Package database
 pub mod file; // Traits, structs, and functions for interfacing with the filesystem
@@ -22,3 +24,16 @@ pub mod aes; // AES helper functions
 pub mod config; // Configuration
 pub mod lock; // Lockfiles
 pub mod trustcache; // Trustcache management
+
+pub fn pkgver() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+pub fn gitver() -> String {
+    git_version!().to_string()
+}
+pub fn version() -> String {
+    format!("libmangrove {} ({})", pkgver(), gitver())
+}
+pub fn mwl_statement() -> String {
+    format!("{}\nmade with love by the libmangrove team", version())
+}
