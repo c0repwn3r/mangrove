@@ -1,6 +1,6 @@
 [package]
 name = "mangrove-cli"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,7 +13,7 @@ path = "src/main.rs"
 clap = { version = "3.2.20", features = ["derive", "cargo", "suggestions"] }
 clap_complete = "3.2.4"
 clap-nested = "0.4.0"
-libmangrove = { version = "0.1.0", path = "../libmangrove" }
+libmangrove = { version = "0.2", path = "../libmangrove" }
 colored = "2.0.0"
 serde = { version = "1.0.144", features = ["derive"] }
 version = { version = "1.0.7", features = ["serde"], package="semver" }
