@@ -1,6 +1,6 @@
 use std::error::Error;
 use clap::{Parser, Subcommand, AppSettings, ArgAction};
-use libmangrove::version;
+use libmangrove::{detailed_version, version};
 use crate::cli::ExecutableCommand;
 use crate::create::CreateCommand;
 use crate::inspect::InspectCommand;
@@ -22,6 +22,9 @@ pub struct MangroveCLI {
     #[clap(short = 'v', long = "version", action = ArgAction::SetTrue, default_value_t = false, help = "Show the Mangrove CLI and libmangrove versions.")]
     show_version: bool,
 
+    #[clap(short = 'V', long = "detailed_version", action = ArgAction::SetTrue, default_value_t = false, help = "Show detailed information about the version of libmangrove this binary is linked against")]
+    show_lmg_version: bool,
+
     #[clap(subcommand)]
     command: Option<MangroveCLIOptions>
 }
@@ -39,6 +42,10 @@ impl ExecutableCommand for MangroveCLI {
         if self.show_version {
             println!("mangrove-cli {}, {}", env!("CARGO_PKG_VERSION"), version());
             return Ok(());
+        }
+        if self.show_lmg_version {
+            println!("mangrove-cli {}\n{}", env!("CARGO_PKG_VERSION"), detailed_version());
+            return Ok(())
         }
         if self.command.is_none() {
             err(format!("a subcommand is required"));

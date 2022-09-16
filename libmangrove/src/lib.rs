@@ -25,6 +25,7 @@ pub mod config; // Configuration
 pub mod lock; // Lockfiles
 pub mod trustcache; // Trustcache management
 
+// Version stuff //
 pub fn pkgver() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
@@ -34,7 +35,9 @@ pub fn gitver() -> String {
 pub fn version() -> String {
     format!("libmangrove {} ({})", pkgver(), gitver())
 }
-pub fn mwl_statement() -> String {
-    format!("{}\nmade with love by the libmangrove team", version())
-}
 
+pub fn detailed_version() -> String {
+    format!("libmangrove {} ({})\nbuilt on {} at {}, commitinfo {}/{} (dirty: {}), rust channel {} rustc {}\nsource timestamp {}",
+            pkgver(), gitver(), env!("BUILD_HOSTNAME"), env!("BUILD_TIMESTAMP"), env!("GIT_BRANCH"), env!("GIT_COMMIT_SHORT"), env!("GIT_DIRTY"), env!("RUST_CHANNEL"),
+            env!("RUSTC_VERSION"), env!("SOURCE_TIMESTAMP"))
+}
