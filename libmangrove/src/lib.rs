@@ -37,3 +37,4 @@ pub fn version() -> String {
 pub fn mwl_statement() -> String {
     format!("{}\nmade with love by the libmangrove team", version())
 }
+

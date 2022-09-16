@@ -3,8 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/libmangrove/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/mangrove-cli/mangrove-create/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/mangrove-cli/mangrove-inspect/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cli/mangrove-create/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cli/mangrove-inspect/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mangrove-cli/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
