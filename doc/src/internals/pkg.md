@@ -206,3 +206,204 @@ pub struct FileMetadata {
 }
 ```
 </details>
+
+Here's the table for `PackageContents`:
+
+| Field   | Optional | Type               | Description                                                             | Example   |
+|---------|----------|--------------------|-------------------------------------------------------------------------|-----------|
+| folders | yes      | Vec<PackageFolder> | A list of folders, if any, that are present inside this package.        | See below |
+| files   | yes      | Vec<PackageFile>   | A list of files, if any, that are present inside this package.          | See below |
+| links   | yes      | Vec<PackageLink>   | A list of symbolic links, if any, that are present inside this package. | See below |
+
+The table for `PackageFolder`:
+
+| Field       | Optional | Type         | Description                                          | Example            |
+|-------------|----------|--------------|------------------------------------------------------|--------------------|
+| name        | no       | String       | The name of the folder insize the package.           | "/opt/helloworld"  |
+| mtime       | no       | usize        | The last modified time of the folder.                | 0                  |
+| installpath | no       | String       | The path to install the folder to on the filesystem. | "/opt/helloworld"  |
+| meta        | no       | FileMetadata | The file permissions and metadata                    | See below          |
+> **Note:** Due to an intentional design decision while creating mangrove, while it is possible for `name` and `installpath` to be different, this constitutes an invalid package entry, and it will either error or be ignored.
+
+`PackageFile`:
+
+| Field       | Optional | Type         | Description                                          | Example                                                            |
+|-------------|----------|--------------|------------------------------------------------------|--------------------------------------------------------------------|
+| name        | no       | String       | The name of the folder insize the package.           | "/opt/helloworld/hi"                                               |
+| sha256      | no       | String       | The sha256 hash of the file after decompression.     | "b2bbddeabbceef232628ada1603ba4dda1d29c73d360cfa0a608baa5a70a7152" |
+| meta        | no       | FileMetadata | The file permissions and metadata                    | See below                                                          |
+| mtime       | no       | usize        | The last modified time of the folder.                | 0                                                                  |
+| installpath | no       | String       | The path to install the folder to on the filesystem. | "/opt/helloworld/hi"                                               |
+> **Note:** Due to an intentional design decision while creating mangrove, while it is possible for `name` and `installpath` to be different, this constitutes an invalid package entry, and it will either error or be ignored.
+
+`PackageLink`:
+
+| Field  | Optional | Type    | Description                                              | Example           |
+|--------|----------|---------|----------------------------------------------------------|-------------------|
+| file   | no       | String  | The source file of the symbolic link                     | "/etc/fileA"      |
+| mtime  | no       | usize   | The modification time of the **symlink**, not its target | 0                 |
+| target | no       | String  | The target file of the symbolic link                     | "/etc/lnktofileA" |
+
+Finally, `FileMetadata`:
+
+
+| Field       | Optional | Type    | Description                     | Example |
+|-------------|----------|---------|---------------------------------|---------|
+| owner       | no       | usize   | The owner's UID                 | 1000    |
+| group       | no       | usize   | The group's GID                 | 1000    |
+| permissions | no       | usize   | The file permissions, numerical | 755     |
+
+These structures are all serialized using [MessagePack](https://messagepack.org), and the result is saved to the pkginfo file.
+
+<details>
+    <summary>Why MessagePack?</summary>
+
+To demonstrate why MessagePack was picked for this, here is the test_package@v1 serialized into json instead:
+```json
+[
+  "test",
+  "0.0.1",
+  "A test package, used in Mangrove unit tests",
+  "This is a longer package description for test, which is a test package uesd in mangrove unit tests.",
+  "amd64",
+  "https://mgve.cc",
+  "GNU-GPL-3-or-later",
+  [
+    "thisisgroup1",
+    "thisisgroup2"
+  ],
+  [
+    [
+      "test-data",
+      "*"
+    ],
+    [
+      "test-data-2",
+      "^0.0.0"
+    ]
+  ],
+  [
+    "test-opt: for doing something else"
+  ],
+  [
+    [
+      "other-package",
+      "*"
+    ]
+  ],
+  [
+    [
+      "conflicting-package",
+      "*"
+    ]
+  ],
+  [
+    [
+      "old-package",
+      "*"
+    ]
+  ],
+  234234324,
+  [
+    [
+      [
+        "/hello_world",
+        0,
+        "/hello_world",
+        [
+          0,
+          0,
+          644
+        ]
+      ],
+      [
+        "/usr",
+        0,
+        "/usr",
+        [
+          0,
+          0,
+          644
+        ]
+      ],
+      [
+        "/usr/bin",
+        0,
+        "/usr/bin",
+        [
+          0,
+          0,
+          644
+        ]
+      ]
+    ],
+    [
+      [
+        "/hello_world/helloworld",
+        "cb0659425446bd79e7699e858041748deaae8423f63e6feaf907bfbb9345a32b",
+        [
+          0,
+          0,
+          644
+        ],
+        0,
+        "/hello_world/helloworld"
+      ]
+    ],
+    [
+      [
+        "/hello_world/helloworld",
+        0,
+        "/usr/bin/helloworld"
+      ]
+    ]
+  ]
+]
+```
+This comes in at just over 1364 bytes.
+
+On the other hand, here is the messagepack representation:
+```hexdump
+a49f 6574 7473 30a5 302e 312e 2bd9 2041
+6574 7473 7020 6361 616b 6567 202c 7375
+6465 6920 206e 614d 676e 6f72 6576 7520
+696e 2074 6574 7473 d973 5463 6968 2073
+7369 6120 6c20 6e6f 6567 2072 6170 6b63
+6761 2065 6564 6373 6972 7470 6f69 206e
+6f66 2072 6574 7473 202c 6877 6369 2068
+7369 6120 7420 7365 2074 6170 6b63 6761
+2065 6575 6473 6920 206e 616d 676e 6f72
+6576 7520 696e 2074 6574 7473 2e73 61a5
+646d 3436 68af 7474 7370 2f3a 6d2f 7667
+2e65 6363 47b2 554e 472d 4c50 332d 6f2d
+2d72 616c 6574 9272 74ac 6968 6973 6773
+6f72 7075 ac31 6874 7369 7369 7267 756f
+3270 9292 74a9 7365 2d74 6164 6174 2aa1
+ab92 6574 7473 642d 7461 2d61 a632 305e
+302e 302e d991 7422 7365 2d74 706f 3a74
+6620 726f 6420 696f 676e 7320 6d6f 7465
+6968 676e 6520 736c 9165 ad92 746f 6568
+2d72 6170 6b63 6761 a165 912a b392 6f63
+666e 696c 7463 6e69 2d67 6170 6b63 6761
+a165 912a ab92 6c6f 2d64 6170 6b63 6761
+a165 ce2a f60d d421 9393 ac94 682f 6c65
+6f6c 775f 726f 646c ac00 682f 6c65 6f6c
+775f 726f 646c 0093 cd00 8402 a494 752f
+7273 a400 752f 7273 0093 cd00 8402 a894
+752f 7273 622f 6e69 a800 752f 7273 622f
+6e69 0093 cd00 8402 9591 2fb7 6568 6c6c
+5f6f 6f77 6c72 2f64 6568 6c6c 776f 726f
+646c 40d9 6263 3630 3935 3234 3435 3634
+6462 3937 3765 3936 6539 3538 3038 3134
+3437 6438 6165 6561 3438 3332 3666 6533
+6636 6165 3966 3730 6662 6262 3339 3534
+3361 6232 0093 cd00 8402 b700 682f 6c65
+6f6c 775f 726f 646c 682f 6c65 6f6c 6f77
+6c72 9164 b793 682f 6c65 6f6c 775f 726f
+646c 682f 6c65 6f6c 6f77 6c72 0064 2fb3
+7375 2f72 6962 2f6e 6568 6c6c 776f 726f
+646c
+```
+which comes out to just over 600 bytes for a 57% reduction. Pretty cool!
+
+</details>
