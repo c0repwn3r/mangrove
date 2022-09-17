@@ -351,6 +351,9 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
     // Verify hashes
     if pkginfo.as_ref().unwrap().pkgcontents.files.is_some() {
         for file in pkginfo.as_ref().unwrap().pkgcontents.files.as_ref().unwrap() {
+            if !hashes.contains_key(&*file.name) {
+                Err(format!("Hash for {} is missing", file.name))?
+            }
             if hashes.get(&*file.name).unwrap() != &file.sha256 {
                 Err(format!("Fatal error: hash verification failed for {} (expected {} got {})", file.name, file.sha256, hashes.get(&*file.name).unwrap()))?
             }

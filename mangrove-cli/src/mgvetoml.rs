@@ -20,7 +20,7 @@ pub struct BuildConfig {
     pub replaces: Option<Vec<PkgSpec>>,  // Replaces: List of PkgSpec (optional)
 }
 
-pub fn buildtoml_name(cf: &BuildConfig) -> String {
+pub fn _buildtoml_name(cf: &BuildConfig) -> String {
     return format!(
         "{}_{}_{}.mgve",
         cf.pkgname,
