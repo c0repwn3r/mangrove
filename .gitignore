@@ -3,3 +3,6 @@ target/
 
 # Test coverage
 tarpaulin-report.html
+
+# Generated .mgve files, so they aren't changed in every commit
+*.mgve
