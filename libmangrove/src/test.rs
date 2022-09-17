@@ -170,14 +170,14 @@ mod libmangrove_pkg_tests {
         // Get a test package
         let package: Package = get_test_package();
         // Try to write
-        assert!(Package::to_file(&package, "/path/nonexistent-file/".to_string()).is_err());
+        assert!(Package::as_file(&package, "/path/nonexistent-file/".to_string()).is_err());
     }
 
     #[test]
     #[should_panic]
     fn package_save_to_file_without_permissions() {
         let package: Package = get_test_package();
-        Package::to_file(&package, "/root/cant-write-here/".to_string()).unwrap();
+        Package::as_file(&package, "/root/cant-write-here/".to_string()).unwrap();
     }
 
     #[test]
@@ -226,7 +226,7 @@ mod libmangrove_pkg_tests {
 
     #[test]
     fn package_fileops_load() {
-        match Package::to_file(&get_test_package(), "../test/test_pkginfo".parse().unwrap()) {
+        match Package::as_file(&get_test_package(), "../test/test_pkginfo".parse().unwrap()) {
             Ok(_) => (),
             Err(e) => panic!("{}", e),
         };

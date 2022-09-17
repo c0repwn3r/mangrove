@@ -136,7 +136,7 @@ fn save_package_backend(package: Package, data_dir: String, signing_key: Option<
 
     let root: String = format!("{}{}", root_prefix, random_identifier); // generate the root
 
-    let create_root_result = fs::create_dir_all(&root);
+    let create_root_result = create_dir_all(&root);
     match create_root_result {
         Ok(_) => (),
         Err(error) => {
@@ -197,7 +197,7 @@ fn save_package_backend(package: Package, data_dir: String, signing_key: Option<
         }
     }
     // Step 5: Write package metadata
-    match Package::to_file(&package, format!("{}/pkginfo", &root)) {
+    match Package::as_file(&package, format!("{}/pkginfo", &root)) {
         Ok(_) => (),
         Err(err) => return Err(format!("Failed to save pkginfo: {}", err)),
     }

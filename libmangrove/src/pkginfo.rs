@@ -5,7 +5,7 @@ use std::fs;
 
 impl FileOps for Package {
     /// Takes a Package and saves it to the specified file
-    fn to_file(data: &Package, filename: String) -> Result<(), String> {
+    fn as_file(data: &Package, filename: String) -> Result<(), String> {
         // step 1: serialize myself
         let pkginfo_serialization_result = rmp_serde::to_vec(data);
         let pkginfo_serialized = match pkginfo_serialization_result {

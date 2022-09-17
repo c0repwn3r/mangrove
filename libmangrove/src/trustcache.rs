@@ -35,7 +35,7 @@ pub fn trustcache_load(use_local_trustcache: bool) -> Result<Trustcache, Box<dyn
     // return a trustcache object
     Ok(
         Trustcache {
-            lockfile: lockfile,
+            lockfile,
             keydb: trustcache
         }
     )

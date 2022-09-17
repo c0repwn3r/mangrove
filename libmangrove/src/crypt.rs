@@ -31,7 +31,7 @@ pub fn mcrypt_sha256_file(filename: &String) -> Result<String, String> {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to copy file data: {}", err)),
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    Ok(hex::encode(hasher.finalize()))
 }
 
 // mcrypt_sha256_verify_file

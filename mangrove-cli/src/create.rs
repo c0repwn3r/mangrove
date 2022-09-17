@@ -128,7 +128,7 @@ impl ExecutableCommand for CreateBuildCommand {
         let config: BuildConfig = toml::from_slice(&buildconfig_data[..])?;
         info(format!("building package {}", config.pkgname.blue()));
 
-        let contents = match get_pkgcontents(Path::new("../.."), true, Path::new("../..")) {
+        let contents = match get_pkgcontents(Path::new("."), true, Path::new(".")) {
             Ok(c) => c,
             Err(e) => {
                 println!("failed to enumerate package contents: {}", e);
@@ -157,7 +157,7 @@ impl ExecutableCommand for CreateBuildCommand {
             pkgcontents
         };
 
-        let data_dir = match fs::canonicalize(PathBuf::from("../.."))?.to_str() {
+        let data_dir = match fs::canonicalize(PathBuf::from("."))?.to_str() {
             Some(s) => s,
             None => {
                 Err("Failed to convert string types (for final save)")?
