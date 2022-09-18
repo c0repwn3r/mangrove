@@ -1,6 +1,21 @@
+// Linter configuration
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+
+// Outright bad practice
+#![warn(clippy::unwrap_used)]
+#![warn(clippy::expect_used)]
+
+// Just shut up
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::too_many_lines)]
+
 use std::error::Error;
-use clap::{Parser, Subcommand, AppSettings, ArgAction};
+
+use clap::{AppSettings, ArgAction, Parser, Subcommand};
+
 use libmangrove::{detailed_version, version};
+
 use crate::cli::ExecutableCommand;
 use crate::create::CreateCommand;
 use crate::inspect::InspectCommand;
