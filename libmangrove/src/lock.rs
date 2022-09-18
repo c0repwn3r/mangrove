@@ -1,8 +1,10 @@
 //! Lockfiles (e.g. /etc/mangrove/locks/pkgdb.lock)
 
+use std::error::Error;
+
 use lockfile::Lockfile;
 
-use crate::config::ensure_config;
+use crate::config::create_config_structure;
 
 /*
 Standard lockfile locations:
@@ -11,40 +13,43 @@ Trustcache operations - /etc/mangrove/locks/trustcache.lock
 Package operations    - /etc/mangrove/locks/package.lock
 */
 
-pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config(use_local_lockfile) {
+/// Attempt to get a lock on the repository datastructures
+pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
+    match create_config_structure(use_local_lockfile) {
         Ok(_) => (),
-        Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
+        Err(err) => return Err(format!("Unable to ensure config dir: {}", err).into()),
     }
 
     let path = if use_local_lockfile {"repo.lock"} else {"/etc/mangrove/locks/repo.lock"};
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e).into()),
     };
 
     Ok(lock)
 }
-pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config(use_local_lockfile) {
+/// Attempt to get a lock on the trustcache
+pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
+    match create_config_structure(use_local_lockfile) {
         Ok(_) => (),
-        Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
+        Err(err) => return Err(format!("Unable to ensure config dir: {}", err).into()),
     }
 
     let path = if use_local_lockfile {"trustcache.lock"} else {"/etc/mangrove/locks/trustcache.lock"};
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e).into()),
     };
 
     Ok(lock)
 }
-pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, String> {
-    match ensure_config(use_local_lockfile) {
+/// Attempt to get a lock on the packages datastructures
+pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
+    match create_config_structure(use_local_lockfile) {
         Ok(_) => (),
-        Err(err) => return Err(format!("Unable to ensure config dir: {}", err)),
+        Err(err) => return Err(format!("Unable to ensure config dir: {}", err).into()),
     }
 
     let path = if use_local_lockfile {"package.lock"} else {"/etc/mangrove/locks/package.lock"};
@@ -52,7 +57,7 @@ pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, String> {
 
     let lock = match Lockfile::create(path) {
         Ok(l) => l,
-        Err(e) => return Err(format!("Failed to lock: {:?}", e)),
+        Err(e) => return Err(format!("Failed to lock: {:?}", e).into()),
     };
 
     Ok(lock)

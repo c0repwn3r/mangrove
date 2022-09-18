@@ -5,12 +5,15 @@ use std::fs::create_dir_all;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
-use clap::{Parser, Subcommand, ArgAction};
+
+use clap::{ArgAction, Parser, Subcommand};
 use colored::Colorize;
 use version::Version;
+
 use libmangrove::crypt::mcrypt_sha256_file;
 use libmangrove::pkg::{FileMetadata, Package, PackageContents, PackageFile, PackageFolder, PackageLink, save_package};
 use libmangrove::platform::Architecture;
+
 use crate::{err, ExecutableCommand};
 use crate::mgvetoml::BuildConfig;
 use crate::util::{info, warn};
@@ -164,7 +167,7 @@ impl ExecutableCommand for CreateBuildCommand {
             }
         }.to_string();
 
-        save_package(pkg, data_dir.clone())?;
+        save_package(&pkg, data_dir.clone())?;
 
         info(format!("wrote out package to {}", data_dir));
         Ok(())

@@ -1,12 +1,13 @@
 //! # Various cryptographic helper functions to remove repetitive code
 
+use std::{fs::File, io};
+use std::error::Error;
+
 use arrayref::array_ref;
 use ed25519_dalek::{Keypair, PublicKey as VerifyingKey, Signature, Signer, Verifier};
 use rand_dalek::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{fs::File, io};
-use std::error::Error;
 
 use crate::aes::AES256Cipher;
 use crate::trustcache::Trustcache;
@@ -19,19 +20,23 @@ use crate::trustcache::Trustcache;
 /// let string_hash: String = mcrypt_sha256_file(&String::from("../test/hash.txt")).unwrap();
 /// assert_eq!(string_hash, "1805ddd21da13e7038470a391cc082680b7e680a2fc40ed7db01ee32a8c6cbd6");
 /// ```
-//
-pub fn mcrypt_sha256_file(filename: &String) -> Result<String, String> {
+/// # Errors
+/// `mcrypt_sha256_file` may return an error for the following reasons:
+/// - if it fails to open the provided file
+/// - if it fails to copy data from the file to the hasher
+pub fn mcrypt_sha256_file(filename: &String) -> Result<String, Box<dyn Error>> {
     let file_r = File::open(filename);
     let mut file_ptr = match file_r {
         Ok(ptr) => ptr,
-        Err(err) => return Err(format!("Unable to open file for reading: {}", err)),
+        Err(err) => return Err(format!("Unable to open file for reading: {}", err).into()),
     };
     let mut hasher = Sha256::new();
     match io::copy(&mut file_ptr, &mut hasher) {
         Ok(_) => (),
-        Err(err) => return Err(format!("Unable to copy file data: {}", err)),
+        Err(err) => return Err(format!("Unable to copy file data: {}", err).into()),
     }
-    Ok(hex::encode(hasher.finalize()))
+    // IntelliJ platform users: Ignore the warning here. This is a bug in the IntelliJ Rust plugin.
+    Ok(format!("{:x}", hasher.finalize()))
 }
 
 // mcrypt_sha256_verify_file
@@ -40,17 +45,20 @@ pub fn mcrypt_sha256_file(filename: &String) -> Result<String, String> {
 /// use libmangrove::crypt::mcrypt_sha256_verify_file;
 /// mcrypt_sha256_verify_file(&String::from("../test/hash.txt"), &String::from("1805ddd21da13e7038470a391cc082680b7e680a2fc40ed7db01ee32a8c6cbd6")).expect("");
 /// ```
+/// # Errors
+/// This function will error if:
+/// - the file could not be hashed (see `mcrypt_sha256_file`)
+/// - the hash does not match
 //
-pub fn mcrypt_sha256_verify_file(filename: &String, expect: &String) -> Result<(), String> {
+pub fn mcrypt_sha256_verify_file(filename: &String, expect: &String) -> Result<(), Box<dyn Error>> {
     let sha256 = match mcrypt_sha256_file(filename) {
         Ok(hash) => hash,
         Err(error) => return Err(error),
     };
     if &sha256 != expect {
-        return Err(format!("Hash of {} does not match {}", sha256, expect));
-    } else {
-        Ok(())
+        return Err(format!("Hash of {} does not match {}", sha256, expect).into());
     }
+    Ok(())
 }
 
 // PublicKey
@@ -58,7 +66,9 @@ pub fn mcrypt_sha256_verify_file(filename: &String, expect: &String) -> Result<(
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublicKey {
+    /// The key name, if loaded from a public key file. This is almost always unused, and will most of the time be \_\_anonymous\_\_
     pub name: String,
+    /// The ed25519 public key data
     pub key_data: VerifyingKey,
 }
 
@@ -67,7 +77,9 @@ pub struct PublicKey {
 //
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrivateKey {
+    /// The key name, if loaded from a private key file. This is almost always unused, and will most of the time be \_\_anonymous\_\_
     pub name: String,
+    /// The ed25519 keypair. This contains the public key as well and as such can be used to derive a public key.
     pub key_data: Keypair,
 }
 
@@ -111,9 +123,14 @@ impl PrivateKey {
 
     // from_anonymous
     /// Attempt to create a new PrivateKey from an anonymous base64-encoded private key.
+    /// # Errors
+    /// This function may error if:
+    /// - an error occured trying to convert "__anonymous__" to a String
+    /// - an error occured while decoding the base64 key
+    /// - an error occured while loading the base64 key into a Keypair
     pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
         Ok(PrivateKey {
-            name: "__anonymous__".parse().unwrap(),
+            name: "__anonymous__".parse()?,
             key_data: Keypair::from_bytes(&*base64::decode(anonymous)?)?
         })
     }
@@ -128,9 +145,14 @@ impl PublicKey {
 
     // from_anonymous
     /// Attempt to create a new PublicKey from an anonymous base64-encoded public key.
+    /// # Errors
+    /// This function may error if:
+    /// - an error occured trying to convert "__anonymous__" to a String
+    /// - an error occured while decoding the base64 key
+    /// - an error occured while loading the base64 key into a VerifyingKey
     pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
         Ok(PublicKey {
-            name: "__anonymous__".parse().unwrap(),
+            name: "__anonymous__".parse()?,
             key_data: VerifyingKey::from_bytes(&*base64::decode(anonymous)?)?
         })
     }
@@ -160,8 +182,10 @@ pub fn mcrypt_sha256_raw(data: &[u8]) -> Vec<u8> {
 /// let data_to_encrypt: [u8; 5] = [0x42u8;5];
 /// let encrypted_data = encrypt_package(&private_key, &data_to_encrypt).unwrap();
 /// ```
+/// # Errors
+/// This function may return an error if the signature fails sanity checks or the data length is over
 //
-pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String> {
+pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     // Encrypted package format:
     // field  value         description
     //
@@ -174,7 +198,7 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
     // p_val  0x42          End sentinel
     let signature: Signature = key.key_data.sign(data);
     if key.key_data.verify(data, &signature).is_err() {
-        panic!("Signature immediately failed verification");
+        return Err("Signature failed basic sanity checks".into())
     }
     let mut signature_b = signature.to_bytes().to_vec();
     let aes_key = mcrypt_sha256_raw(&signature_b);
@@ -183,9 +207,16 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
     let data_arr: &[u8] = data;
     let mut enc_data = aes_cipher.encrypt(data_arr);
     let mut header: Vec<u8> = vec![0x4d, 0x47, 0x56, 0x45];
+    #[allow(clippy::cast_possible_truncation)] // Signature length will always be 64, which is within the range of u8
     header.push(signature_b.len() as u8);
     header.append(&mut signature_b);
     header.push(0x00);
+
+    /* Fixes a data truncation error caused by package data lengths above 4294967295 bytes. */
+    if enc_data.len() > u32::MAX as usize {
+        return Err(format!("Data length {} is above maximum of {}", enc_data.len(), u32::MAX).into());
+    }
+    #[allow(clippy::cast_possible_truncation)] // bounds checked above
     header.append(&mut (enc_data.len() as u32).to_be_bytes().to_vec());
     header.append(&mut enc_data);
     header.push(0x42u8);
@@ -202,14 +233,21 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, String>
 /// let data_to_encrypt: [u8; 5] = [0x42u8;5];
 ///
 /// let encrypted_data = encrypt_package(&private_key, &data_to_encrypt).unwrap();
-/// let decrypted_data = decrypt_package(&public_key, encrypted_data).unwrap();
+/// let decrypted_data = decrypt_package(&public_key, &encrypted_data[..]).unwrap();
 /// assert_eq!(data_to_encrypt.to_vec(), decrypted_data);
 /// ```
+/// # Errors
+/// This function will error if:
+/// - the magic is missing
+/// - the start/data sentinel is missing
+/// - end sentinel is missing
+/// - the signature could not be loaded
+/// - the digital signature was invalid
 //
-pub fn decrypt_package(vkey: &PublicKey, data: Vec<u8>) -> Result<Vec<u8>, String> {
+pub fn decrypt_package(vkey: &PublicKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     // Check for the magic
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
-        return Err("Not an encrypted package (magic missing)".to_string());
+        return Err("Not an encrypted package (magic missing)".into());
     }
     // Get signature length
     let s_len = data[4] as usize;
@@ -217,7 +255,7 @@ pub fn decrypt_package(vkey: &PublicKey, data: Vec<u8>) -> Result<Vec<u8>, Strin
     let s_dat = &data[5..5 + s_len];
     // Validate package data
     if data[5 + s_len] != 0x0u8 {
-        return Err("Package has been corrupt (s/d sentinel missing)".to_string());
+        return Err("Package has been corrupt (s/d sentinel missing)".into());
     }
     // Derive key from signature
     let raw_key = mcrypt_sha256_raw(s_dat);
@@ -227,7 +265,7 @@ pub fn decrypt_package(vkey: &PublicKey, data: Vec<u8>) -> Result<Vec<u8>, Strin
     let d_dat = &data[10 + s_len..10 + s_len + d_len];
     // Validate package data
     if data[10 + s_len + d_len] != 0x42u8 || data[data.len() - 1] != 0x42u8 {
-        return Err("Package has been corrupt (end sentinel missing)".to_string());
+        return Err("Package has been corrupt (end sentinel missing)".into());
     }
     // Package meets the proper structure
     // Decrypt package data
@@ -235,11 +273,11 @@ pub fn decrypt_package(vkey: &PublicKey, data: Vec<u8>) -> Result<Vec<u8>, Strin
     // Validate digital signature
     let sig = match Signature::from_bytes(s_dat) {
         Ok(sig) => sig,
-        Err(err) => return Err(format!("Failed to load signature data: {}", err)),
+        Err(err) => return Err(format!("Failed to load signature data: {}", err).into()),
     };
     match vkey.key_data.verify(&d_dat_dec, &sig) {
         Ok(_) => (),
-        Err(err) => return Err(format!("The digital signature is invalid: {}", err)),
+        Err(err) => return Err(format!("The digital signature is invalid: {}", err).into()),
     }
     // Signature is valid, strip extra data and return
     Ok(d_dat_dec)
@@ -298,14 +336,11 @@ pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
 
     result += &*format!("| Decrypted Data: {:x?}\n", d_dat_dec);
     // Validate digital signature
-    let sig = match Signature::from_bytes(s_dat) {
-        Ok(sig) => sig,
-        Err(_) => {
-            result += "| Signature Load: Failure\n";
-            result += "| Package State: INVALID\n";
-            result += "== End Package Dump ==";
-            return result;
-        },
+    let sig = if let Ok(sig) = Signature::from_bytes(s_dat) { sig } else {
+        result += "| Signature Load: Failure\n";
+        result += "| Package State: INVALID\n";
+        result += "== End Package Dump ==";
+        return result;
     };
     result += "| Signature Load: Success\n";
     if vkey.is_none() {
@@ -314,19 +349,20 @@ pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
         result += "== End Package Dump ==";
         return result;
     }
-    match vkey.unwrap().key_data.verify(&d_dat_dec, &sig) {
-        Ok(_) => (),
-        Err(_) => {
-            result += "| Data Signature: Failure\n";
-            result += "| Package State: INVALID\n";
-            result += "== End Package Dump ==";
-            return result;
-        }
+    let vkeyv = match vkey {
+        Some(k) => k,
+        None => return result
+    };
+    if vkeyv.key_data.verify(&d_dat_dec, &sig).is_err() {
+        result += "| Data Signature: Failure\n";
+        result += "| Package State: INVALID\n";
+        result += "== End Package Dump ==";
+        return result;
     }
     result += "| Data Signature: OK\n";
     result += "| Package State: OK\n";
     result += "== End Package Dump ==";
-    return result;
+    result
 }
 
 // is_signed_package
@@ -365,27 +401,27 @@ pub fn is_signed_package(data: Vec<u8>) -> bool {
 // find_key
 /// Try every public key in the trustcache against the provided SPF data and try to find the key it is encrypted with.
 //
-pub fn find_key(data: &Vec<u8>, trustcache: &Trustcache) -> Option<PublicKey> {
+pub fn find_key(data: &[u8], trustcache: &Trustcache) -> Option<PublicKey> {
     // try known public keys
     for key in &trustcache.keydb.known_pubkeys {
         // load __anonymous__ key
-        let pk = match PublicKey::from_anonymous(key.to_owned()) {
+        let pk = match PublicKey::from_anonymous(key.clone()) {
             Ok(k) => k,
             Err(_) => return None
         };
-        if decrypt_package(&pk, data.clone()).is_ok() {
+        if decrypt_package(&pk, data).is_ok() {
             return Some(pk);
         }
     }
     // try known private keys
     for key in &trustcache.keydb.known_privkeys {
         // load __anonymous__ key
-        let sk = match PrivateKey::from_anonymous(key.to_owned()) {
+        let sk = match PrivateKey::from_anonymous(key.clone()) {
             Ok(k) => k,
             Err(_) => return None
         };
         let pk = sk.derive();
-        if decrypt_package(&pk, data.clone()).is_ok() {
+        if decrypt_package(&pk, data).is_ok() {
             return Some(pk);
         }
     }

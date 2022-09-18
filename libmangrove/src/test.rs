@@ -1,8 +1,10 @@
 //! # libmangrove tests
 //! This module contains the libmangrove test suite. It does nothing useful otherwise.
 
+#[cfg(test)]
 mod libmangrove_tests_common {
     use version::{BuildMetadata, Prerelease, Version, VersionReq};
+
     use crate::crypt::{PrivateKey, PublicKey};
     use crate::pkg::{FileMetadata, Package, PackageContents, PackageFile, PackageFolder, PackageLink, PkgSpec};
     use crate::platform::Architecture;
@@ -116,7 +118,7 @@ mod libmangrove_tests_common {
     pub fn get_test_repopackage() -> RepoPackage {
         let repopkg: RepoPackage = RepoPackage {
             package_data: get_test_package(),
-            avaliable_versions: vec![
+            available_versions: vec![
                 Version::parse("0.0.1").expect("Failure while parsing version")
             ],
         };
@@ -142,11 +144,13 @@ mod libmangrove_tests_common {
 #[cfg(test)]
 mod libmangrove_pkg_tests {
     use std::{env, fs};
-    use crate::crypt::{is_signed_package};
+
+    use serial_test::serial;
+
+    use crate::crypt::is_signed_package;
     use crate::file::FileOps;
     use crate::pkg::{get_pkg_filename, Package, save_package, save_package_signed};
     use crate::test::libmangrove_tests_common::{get_test_package, get_test_package_bytes, get_test_privkey};
-    use serial_test::serial;
 
     #[test]
     fn package_serialization() {
@@ -185,7 +189,7 @@ mod libmangrove_pkg_tests {
     fn package_saving() {
         println!("{:?}", env::current_dir().unwrap());
         match save_package(
-            get_test_package(),
+            &get_test_package(),
             format!("{}/../test/test-package", env::current_dir().unwrap().to_str().unwrap()),
         ) {
             Ok(_) => (),
@@ -199,7 +203,7 @@ mod libmangrove_pkg_tests {
     #[serial] // If run concurrently with package_saving, will fail
     fn package_saving_signed() {
         match save_package_signed(
-            get_test_package(),
+            &get_test_package(),
             format!("{}/../test/test-package-signed", env::current_dir().unwrap().to_str().unwrap()),
             get_test_privkey(),
         ) {
@@ -212,7 +216,7 @@ mod libmangrove_pkg_tests {
     #[serial]
     fn package_validating_signed() {
         match save_package_signed(
-            get_test_package(),
+            &get_test_package(),
             format!("{}/../test/test-package", env::current_dir().unwrap().to_str().unwrap()),
             get_test_privkey(),
         ) {
@@ -321,7 +325,7 @@ mod libmangrove_mcrypt_tests {
             Ok(e) => e,
             Err(err) => panic!("{}", err),
         };
-        let decrypted = match decrypt_package(&pk, encrypted) {
+        let decrypted = match decrypt_package(&pk, &encrypted[..]) {
             Ok(d) => d,
             Err(err) => panic!("{}", err),
         };
@@ -358,8 +362,9 @@ mod libmangrove_mcrypt_tests {
 
 #[cfg(test)]
 mod libmangrove_lockfile_tests {
-    use crate::lock::{lock_packages, lock_repository, lock_trustcache};
     use serial_test::serial;
+
+    use crate::lock::{lock_packages, lock_repository, lock_trustcache};
 
     #[test]
     #[serial]
@@ -409,8 +414,9 @@ mod libmangrove_lockfile_tests {
 
 #[cfg(test)]
 mod libmangrove_database_tests {
-    use crate::trustcache::{trustcache_load, trustcache_save};
     use serial_test::serial;
+
+    use crate::trustcache::{trustcache_load, trustcache_save};
 
     #[test]
     #[serial]

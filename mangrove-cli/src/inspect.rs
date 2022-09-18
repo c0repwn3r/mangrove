@@ -1,10 +1,13 @@
-use clap::{Parser, ArgAction};
 use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
+
+use clap::{ArgAction, Parser};
+
 use libmangrove::crypt::{debug_dump_package, decrypt_package, find_key, is_signed_package, PublicKey};
 use libmangrove::pkg::{dump_package, load_package};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
+
 use crate::cli::ExecutableCommand;
 
 #[derive(Parser)]
@@ -73,7 +76,7 @@ impl ExecutableCommand for InspectCommand {
                 foundkey = realkey;
             }
             println!("Decrypting package...");
-            match decrypt_package(foundkey.as_ref().unwrap(), data) {
+            match decrypt_package(foundkey.as_ref().unwrap(), &data[..]) {
                 Ok(d) => {
                     package_data = d;
                 },
