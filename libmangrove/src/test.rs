@@ -132,12 +132,12 @@ mod libmangrove_tests_common {
 
     #[allow(unused)]
     pub fn get_test_privkey() -> PrivateKey {
-        PrivateKey::from_anonymous("AWxDWGKXZZOndWlvY5gvsbLzeRJEFpueNUoR/VCDKXMtBoeIyZoHATvrJWgu5vG2XlEqAbZuUGtCRERaa2aBPw==".to_string()).unwrap()
+        PrivateKey::from_anonymous(&"AWxDWGKXZZOndWlvY5gvsbLzeRJEFpueNUoR/VCDKXMtBoeIyZoHATvrJWgu5vG2XlEqAbZuUGtCRERaa2aBPw==".to_string()).unwrap()
     }
 
     #[allow(unused)]
     pub fn get_test_pubkey() -> PublicKey {
-        PublicKey::from_anonymous("LQaHiMmaBwE76yVoLubxtl5RKgG2blBrQkREWmtmgT8=".to_string()).unwrap()
+        PublicKey::from_anonymous(&"LQaHiMmaBwE76yVoLubxtl5RKgG2blBrQkREWmtmgT8=".to_string()).unwrap()
     }
 }
 

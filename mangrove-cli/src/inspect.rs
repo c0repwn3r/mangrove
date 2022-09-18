@@ -35,7 +35,7 @@ impl ExecutableCommand for InspectCommand {
         };
         let mut key: Option<PublicKey> = None;
         if args.key.is_some() {
-            key = match PublicKey::from_anonymous(args.key.as_ref().unwrap().to_owned()) {
+            key = match PublicKey::from_anonymous(&args.key.as_ref().unwrap().to_owned()) {
                 Ok(k) => Some(k),
                 Err(e) => {
                     println!("warn: failed to load __anonymous__ public key ({}), skipping key checks", e);

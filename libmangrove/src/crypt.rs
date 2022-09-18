@@ -128,7 +128,7 @@ impl PrivateKey {
     /// - an error occured trying to convert "__anonymous__" to a String
     /// - an error occured while decoding the base64 key
     /// - an error occured while loading the base64 key into a Keypair
-    pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
+    pub fn from_anonymous(anonymous: &String) -> Result<Self, Box<dyn Error>> {
         Ok(PrivateKey {
             name: "__anonymous__".parse()?,
             key_data: Keypair::from_bytes(&*base64::decode(anonymous)?)?
@@ -150,7 +150,7 @@ impl PublicKey {
     /// - an error occured trying to convert "__anonymous__" to a String
     /// - an error occured while decoding the base64 key
     /// - an error occured while loading the base64 key into a VerifyingKey
-    pub fn from_anonymous(anonymous: String) -> Result<Self, Box<dyn Error>> {
+    pub fn from_anonymous(anonymous: &String) -> Result<Self, Box<dyn Error>> {
         Ok(PublicKey {
             name: "__anonymous__".parse()?,
             key_data: VerifyingKey::from_bytes(&*base64::decode(anonymous)?)?
@@ -405,7 +405,7 @@ pub fn find_key(data: &[u8], trustcache: &Trustcache) -> Option<PublicKey> {
     // try known public keys
     for key in &trustcache.keydb.known_pubkeys {
         // load __anonymous__ key
-        let pk = match PublicKey::from_anonymous(key.clone()) {
+        let pk = match PublicKey::from_anonymous(&key.clone()) {
             Ok(k) => k,
             Err(_) => return None
         };
@@ -416,7 +416,7 @@ pub fn find_key(data: &[u8], trustcache: &Trustcache) -> Option<PublicKey> {
     // try known private keys
     for key in &trustcache.keydb.known_privkeys {
         // load __anonymous__ key
-        let sk = match PrivateKey::from_anonymous(key.clone()) {
+        let sk = match PrivateKey::from_anonymous(&key.clone()) {
             Ok(k) => k,
             Err(_) => return None
         };
