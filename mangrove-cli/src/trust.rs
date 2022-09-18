@@ -27,18 +27,21 @@ pub enum TrustCommandOptions {
 }
 
 #[derive(Parser)]
+#[clap(about = "Allow a public or private key in the trustcache")]
 pub struct TrustCommandAllow {
     pub key: String,
     #[clap(short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default system-wide one")]
     pub local: bool
 }
 #[derive(Parser)]
+#[clap(about = "Blacklist a public or private key in the trustcache")]
 pub struct TrustCommandDeny {
     pub key: String,
     #[clap(short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default system-wide one")]
     pub local: bool
 }
 #[derive(Parser)]
+#[clap(about = "Remove a public or private key from the allow/blocklists if it is present in either")]
 pub struct TrustCommandClear {
     pub key: String,
     #[clap(short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default system-wide one")]

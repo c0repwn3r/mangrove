@@ -44,6 +44,7 @@ pub enum CreateCommandOptions {
 }
 
 #[derive(Parser)]
+#[clap(about = "Create a new empty source package")]
 pub struct CreateNewCommand {
     #[clap(name = "name", help = "The name of the new package to create. If not provided, will initialize the current directory instead.", default_value_t = String::from("."), value_parser)]
     pub new_name: String,
@@ -119,6 +120,7 @@ impl ExecutableCommand for CreateNewCommand {
 }
 
 #[derive(Parser)]
+#[clap(about = "Build a source package in the current directory")]
 pub struct CreateBuildCommand {}
 impl ExecutableCommand for CreateBuildCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
