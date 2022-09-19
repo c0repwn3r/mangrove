@@ -18,13 +18,13 @@ pub struct TrustCommand {
 
 #[derive(Subcommand)]
 pub enum TrustCommandOptions {
-    #[clap(name = "allow", help = "Add a key to the trusted section of the trustcache")]
+    #[clap(name = "allow")]
     Allow(TrustCommandAllow),
-    #[clap(name = "deny", help = "Add a key to the denied section of the trustcache, removing it from the trusted section if it is present")]
+    #[clap(name = "deny")]
     Deny(TrustCommandDeny),
-    #[clap(name = "clear", help = "Remove a key from the trustcache altogether")]
+    #[clap(name = "clear")]
     Clear(TrustCommandClear),
-    #[clap(name = "query", help = "Query the current status of a key")]
+    #[clap(name = "query")]
     Query(TrustCommandQuery)
 }
 

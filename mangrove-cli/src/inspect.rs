@@ -16,10 +16,10 @@ pub struct InspectCommand {
     #[clap(name = "file", value_parser)]
     pub file: PathBuf,
 
-    #[clap(name = "pubkey", short = 'k', long = "pubkey", value_parser)]
+    #[clap(name = "pubkey", short = 'k', long = "pubkey", value_parser, help = "Set the publickey to be used for package decryption if a package is encrypted")]
     pub key: Option<String>,
 
-    #[clap(name = "local", short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false)]
+    #[clap(name = "local", short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default systemwide one")]
     pub local_cache: bool
 }
 
