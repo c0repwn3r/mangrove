@@ -214,6 +214,9 @@ pub fn allow_pk(trustcache: &mut Trustcache, key: &PublicKey) -> Result<(), Box<
     if is_pk_trusted(trustcache, key)? { return Ok(()); } // done! already trusted
     if is_pk_blacklisted(trustcache, key)? {
         // remove from the blacklist
+        if assoc_sk_blacklisted(trustcache, key)? {
+            return Err("Key is blacklisted by association".into())
+        }
         let index = match trustcache.keydb.deny_pubkeys.iter().position(|r| r == &key.to_anonymous()) {
             Some(i) => i,
             None => return Err("Failed to find index of item in blacklist".into())
@@ -229,9 +232,12 @@ pub fn deny_pk(trustcache: &mut Trustcache, key: &PublicKey) -> Result<(), Box<d
     if is_pk_blacklisted(trustcache, key)? { return Ok(()); } // done! already trusted
     if is_pk_trusted(trustcache, key)? {
         // remove from the allowlist
+        if has_assoc_sk(trustcache, key)? {
+            return Err("Key is trusted by association".into());
+        }
         let index = match trustcache.keydb.known_pubkeys.iter().position(|r| r == &key.to_anonymous()) {
             Some(i) => i,
-            None => return Err("Failed to find index of item in blacklist".into())
+            None => return Err("Failed to find index of item in allowlist".into())
         };
         trustcache.keydb.known_pubkeys.remove(index);
     }
@@ -243,6 +249,9 @@ pub fn deny_pk(trustcache: &mut Trustcache, key: &PublicKey) -> Result<(), Box<d
 pub fn clear_pk(trustcache: &mut Trustcache, key: &PublicKey) -> Result<(), Box<dyn Error>> {
     if is_pk_blacklisted(trustcache, key)? {
         // remove from the blacklist
+        if assoc_sk_blacklisted(trustcache, key)? {
+            return Err("Key is blacklisted by association".into())
+        }
         let index = match trustcache.keydb.deny_pubkeys.iter().position(|r| r == &key.to_anonymous()) {
             Some(i) => i,
             None => return Err("Failed to find index of item in blacklist".into())
@@ -251,6 +260,9 @@ pub fn clear_pk(trustcache: &mut Trustcache, key: &PublicKey) -> Result<(), Box<
     }
     if is_pk_trusted(trustcache, key)? {
         // remove from the allowlist
+        if has_assoc_sk(trustcache, key)? {
+            return Err("Key is trusted by association".into());
+        }
         let index = match trustcache.keydb.known_pubkeys.iter().position(|r| r == &key.to_anonymous()) {
             Some(i) => i,
             None => return Err("Failed to find index of item in blacklist".into())

@@ -23,7 +23,9 @@ pub enum TrustCommandOptions {
     #[clap(name = "deny", help = "Add a key to the denied section of the trustcache, removing it from the trusted section if it is present")]
     Deny(TrustCommandDeny),
     #[clap(name = "clear", help = "Remove a key from the trustcache altogether")]
-    Clear(TrustCommandClear)
+    Clear(TrustCommandClear),
+    #[clap(name = "query", help = "Query the current status of a key")]
+    Query(TrustCommandQuery)
 }
 
 #[derive(Parser)]
@@ -47,13 +49,21 @@ pub struct TrustCommandClear {
     #[clap(short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default system-wide one")]
     pub local: bool
 }
+#[derive(Parser)]
+#[clap(about = "Query the current state of a key")]
+pub struct TrustCommandQuery {
+    pub key: String,
+    #[clap(short = 'l', long = "local", action = ArgAction::SetTrue, default_value_t = false, help = "Use a local trustcache instead of the default system-wide one")]
+    pub local: bool
+}
 
 impl ExecutableCommand for TrustCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         match &self.command {
             TrustCommandOptions::Allow(allow) => allow.execute()?,
             TrustCommandOptions::Deny(deny) => deny.execute()?,
-            TrustCommandOptions::Clear(clear) => clear.execute()?
+            TrustCommandOptions::Clear(clear) => clear.execute()?,
+            TrustCommandOptions::Query(query) => query.execute()?
         }
         Ok(())
     }
@@ -142,5 +152,36 @@ impl ExecutableCommand for TrustCommandClear {
             trustcache_save(trustcache, self.local)?;
         }
         Ok(())
+    }
+}
+impl ExecutableCommand for TrustCommandQuery {
+    fn execute(&self) -> Result<(), Box<dyn Error>> {
+        info("loading the trustcache".into());
+        let trustcache = trustcache_load(self.local)?;
+        return if let Ok(sk) = PrivateKey::from_anonymous(&self.key) {
+            if is_sk_trusted(&trustcache, &sk)? {
+                info(format!("{} is trusted", self.key.blue()));
+            } else if is_sk_blacklisted(&trustcache, &sk)? {
+                info(format!("{} is blacklisted", self.key.blue()));
+            } else {
+                info(format!("{} is not present in the trustcache", self.key.blue()));
+            }
+            trustcache_save(trustcache, self.local)?;
+            Ok(())
+        } else if let Ok(pk) = PublicKey::from_anonymous(&self.key) {
+            if is_pk_trusted(&trustcache, &pk)? {
+                info(format!("{} is trusted", self.key.blue()));
+            } else if is_pk_blacklisted(&trustcache, &pk)? {
+                info(format!("{} is blacklisted", self.key.blue()));
+            } else {
+                info(format!("{} is not present in the trustcache", self.key.blue()));
+            }
+            trustcache_save(trustcache, self.local)?;
+            Ok(())
+        } else {
+            err(format!("could not interpret {} as a public or private key", self.key.blue()));
+            trustcache_save(trustcache, self.local)?;
+            Ok(())
+        }
     }
 }
