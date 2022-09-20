@@ -262,8 +262,10 @@ mod libmangrove_repository_tests {
 #[cfg(test)]
 mod libmangrove_mcrypt_tests {
     use crate::aes::{AES128Cipher, AES192Cipher, AES256Cipher};
-    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, PrivateKey};
+    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, PrivateKey};
     use crate::test::libmangrove_tests_common::{get_test_package_bytes, get_test_privkey, get_test_pubkey};
+    use serial_test::serial;
+    use crate::trustcache::{allow_pk, allow_sk, clear_pk, clear_sk, trustcache_load, trustcache_save};
 
     #[test]
     fn mcrypt_aes128() {
@@ -338,6 +340,28 @@ mod libmangrove_mcrypt_tests {
         // this also tests from_anonymous, as it is used to derive the public key (see common)
         let key = get_test_pubkey();
         assert_eq!(key.to_anonymous(), "LQaHiMmaBwE76yVoLubxtl5RKgG2blBrQkREWmtmgT8=".to_string());
+    }
+
+    #[test]
+    #[serial] // Locks the trustcache
+    fn mcrypt_find_key() {
+        let mut trustcache = trustcache_load(true).unwrap();
+        let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
+        allow_pk(&mut trustcache, &get_test_pubkey()).unwrap();
+        let key = find_key(&data[..], &trustcache).unwrap();
+        clear_pk(&mut trustcache, &get_test_pubkey()).unwrap();
+        trustcache_save(trustcache, true).unwrap();
+    }
+
+    #[test]
+    #[serial] // Locks the trustcache
+    fn mcrypt_find_key_by_assoc() {
+        let mut trustcache = trustcache_load(true).unwrap();
+        let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
+        allow_sk(&mut trustcache, &get_test_privkey()).unwrap();
+        let key = find_key(&data[..], &trustcache).unwrap();
+        clear_sk(&mut trustcache, &get_test_privkey()).unwrap();
+        trustcache_save(trustcache, true).unwrap();
     }
 }
 
