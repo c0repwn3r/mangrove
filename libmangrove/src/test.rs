@@ -348,7 +348,7 @@ mod libmangrove_mcrypt_tests {
         let mut trustcache = trustcache_load(true).unwrap();
         let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
         allow_pk(&mut trustcache, &get_test_pubkey()).unwrap();
-        let key = find_key(&data[..], &trustcache).unwrap();
+        let _ = find_key(&data[..], &trustcache).unwrap();
         clear_pk(&mut trustcache, &get_test_pubkey()).unwrap();
         trustcache_save(trustcache, true).unwrap();
     }
@@ -359,7 +359,7 @@ mod libmangrove_mcrypt_tests {
         let mut trustcache = trustcache_load(true).unwrap();
         let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
         allow_sk(&mut trustcache, &get_test_privkey()).unwrap();
-        let key = find_key(&data[..], &trustcache).unwrap();
+        let _ = find_key(&data[..], &trustcache).unwrap();
         clear_sk(&mut trustcache, &get_test_privkey()).unwrap();
         trustcache_save(trustcache, true).unwrap();
     }
@@ -420,6 +420,8 @@ mod libmangrove_lockfile_tests {
 #[cfg(test)]
 mod libmangrove_database_tests {
     use serial_test::serial;
+    use crate::config::get_pkgdb_file;
+    use crate::pkgdb::{pkgdb_load, pkgdb_save};
 
     use crate::trustcache::{trustcache_load, trustcache_save};
 
@@ -428,5 +430,19 @@ mod libmangrove_database_tests {
     fn trustcache() {
         let trustcache = trustcache_load(true).unwrap();
         trustcache_save(trustcache, true).unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn test_get_pkgdb_file() {
+        assert_eq!(get_pkgdb_file(true), "./db");
+        assert_eq!(get_pkgdb_file(false), "/etc/mangrove/db");
+    }
+
+    #[test]
+    #[serial]
+    fn pkgdb() {
+        let pkgdb = pkgdb_load(true).unwrap();
+        pkgdb_save(pkgdb, true).unwrap();
     }
 }

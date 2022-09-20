@@ -31,3 +31,14 @@ pub fn get_trustcache_file(local: bool) -> String {
         "/etc/mangrove/trust.toml".to_string()
     }
 }
+
+// get_pkgdb_file
+/// This function is used to determine what file the pkgdb should be stored in, depending if it is `local` or not.
+/// If `local` is true, this will return "./db", otherwise "/etc/mangrove/db". Subject to change.
+pub fn get_pkgdb_file(local: bool) -> String {
+    if local {
+        "./db".to_string()
+    } else {
+        "/etc/mangrove/db".to_string()
+    }
+}

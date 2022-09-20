@@ -480,3 +480,10 @@ pub fn dump_package(pkg: &Package) {
     println!("| Links: {}", show_opt(pkg.pkgcontents.links.as_ref()));
     println!("== End Package Dump ==");
 }
+/*
+// extract_pkg_to
+/// Extract a &Package to the given target directory, performing validation as it goes.
+pub fn extract_pkg_to(package: &Package, target: PathBuf) {
+
+}
+ */
