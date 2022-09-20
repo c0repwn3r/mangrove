@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 // Architecture
 /// Represents a system architecture
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[allow(missing_docs)] // this is self explanatory
 pub enum Architecture {
     #[allow(non_camel_case_types)]

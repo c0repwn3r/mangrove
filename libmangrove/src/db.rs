@@ -3,12 +3,10 @@
 extern crate ed25519_dalek;
 
 use serde::{Deserialize, Serialize};
+use url::Url;
 
-use crate::{
-    crypt::PublicKey,
-    pkg::Package, repo::{RepoData, RepoInfo},
-};
-
+use crate::pkg::Package;
+use crate::repo::Repository;
 
 // Database
 /// Represents the package database on disk, contains a list of all installed packages and all configured repositories
@@ -18,21 +16,16 @@ pub struct Database {
     /// This is a list of all of the installed packages
     pub installed_packages: Vec<Package>,
     /// This is a list of the configured repositories
-    pub repositories: Vec<DbRepository>,
+    pub repositories: Vec<ConfiguredRepository>,
 }
 
-// DbRepository
-/// Represents a configured repository, contains a RepoInfo struct, RepoData for the contents of the repo, and the repo's signing key
-//
+/// Represents a configured repository. Just contains it's base URL and the synced data.
 #[derive(Serialize, Deserialize, Debug)]
-#[allow(clippy::module_name_repetitions)]
-pub struct DbRepository {
-    /// Contains the basic information for the repository
-    pub repo_info: RepoInfo,
-    /// Contains the currently synced contents of the repository
-    pub contents: RepoData,
-    /// Contains the repositories signing key
-    pub signing_key: PublicKey,
+pub struct ConfiguredRepository {
+    /// Represents the repository sync baseurl.
+    pub baseurl: Url,
+    /// Represents the synced repository data.
+    pub repodata: Repository
 }
 
 // KeyDb
