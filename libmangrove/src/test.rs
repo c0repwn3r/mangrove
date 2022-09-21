@@ -120,6 +120,11 @@ mod libmangrove_tests_common {
     }
 
     #[allow(unused)]
+    pub fn get_test_nonsense_package_bytes() -> Vec<u8> {
+        vec![159, 217, 35, 89, 93, 28, 209, 184, 239, 191, 189, 239, 191, 189, 239, 191, 189, 84, 94, 88, 239, 191, 189, 42, 239, 191, 189, 239, 191, 189, 239, 191, 189, 58, 51, 57, 17, 58, 171, 57, 57, 57, 46, 57, 57, 57, 46, 57, 57, 57, 186, 9, 69, 117, 239, 191, 189, 96, 239, 191, 189, 239, 191, 189, 239, 191, 189, 9, 239, 191, 189, 239, 191, 189, 239, 191, 189, 217, 230, 36, 239, 191, 189, 52, 25, 67, 79, 98, 239, 191, 189, 239, 191, 189, 239, 191, 189, 24, 239, 191, 189, 239, 191, 189, 0, 2, 20, 239, 191, 189, 111, 2, 88, 100, 57, 64, 42, 239, 191, 189, 239, 191, 189, 89, 239, 191, 189, 125, 239, 191, 189, 117, 239, 191, 189, 99, 3, 38, 110, 239, 191, 189, 239, 191, 189, 239, 191, 189, 117, 62, 46, 108, 44, 78, 239, 191, 189, 213, 159, 239, 191, 189, 45, 239, 191, 189, 73, 239, 191, 189, 239, 191, 189, 239, 191, 189, 239, 191, 189, 78, 239, 191, 189, 239, 191, 189, 60, 239, 191, 189, 108, 116, 239, 191, 189, 126, 239, 191, 189, 239, 191, 189, 7, 239, 191, 189, 62, 239, 191, 189, 78, 239, 191, 189, 239, 191, 189, 65, 82, 239, 191, 189, 10, 20, 239, 191, 189, 100, 239, 191, 189, 25, 239, 191, 189, 239, 191, 189, 239, 191, 189, 98, 239, 191, 189, 239, 191, 189, 239, 191, 189, 123, 48, 67, 239, 191, 189, 121, 9, 73, 200, 147, 18, 239, 191, 189, 98, 106, 239, 191, 189, 110, 239, 191, 189, 239, 191, 189, 79, 83, 239, 191, 189, 94, 43, 239, 191, 189, 239, 191, 189, 239, 191, 189, 51, 42, 239, 191, 189, 61, 239, 191, 189, 239, 191, 189, 22, 200, 142, 165, 97, 109, 100, 54, 52, 217, 45, 112, 57, 83, 100, 239, 191, 189, 26, 115, 239, 191, 189, 37, 239, 191, 189, 239, 191, 189, 72, 64, 74, 239, 191, 189, 232, 136, 141, 239, 191, 189, 45, 239, 191, 189, 239, 191, 189, 36, 239, 191, 189, 239, 191, 189, 217, 96, 25, 239, 191, 189, 45, 239, 191, 189, 99, 239, 191, 189, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 239, 191, 189, 239, 191, 189, 239, 191, 189, 102, 29, 14, 239, 191, 189, 239, 191, 189, 82, 87, 239, 191, 189, 42, 239, 191, 189, 85, 49, 70, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 146, 217, 47, 52, 15, 79, 239, 191, 189, 239, 191, 189, 239, 191, 189, 75, 239, 191, 189, 66, 239, 191, 189, 63, 208, 135, 88, 239, 191, 189, 50, 239, 191, 189, 239, 191, 189, 2, 46, 239, 191, 189, 239, 191, 189, 53, 55, 239, 191, 189, 217, 43, 97, 205, 162, 239, 191, 189, 76, 49, 239, 191, 189, 20, 51, 239, 191, 189, 239, 191, 189, 65, 239, 191, 189, 239, 191, 189, 28, 79, 63, 125, 239, 191, 189, 10, 107, 33, 239, 191, 189, 104, 239, 191, 189, 146, 146, 217, 47, 239, 191, 189, 63, 61, 239, 191, 189, 239, 191, 189, 239, 191, 189, 239, 191, 189, 107, 239, 191, 189, 112, 101, 113, 239, 191, 189, 103, 7, 56, 47, 239, 191, 189, 239, 191, 189, 120, 239, 191, 189, 127, 239, 191, 189, 56, 115, 161, 42, 146, 217, 43, 239, 191, 189, 2, 53, 79, 66, 58, 63, 10, 63, 239, 191, 189, 239, 191, 189, 239, 191, 189, 29, 124, 69, 239, 191, 189, 239, 191, 189, 124, 239, 191, 189, 75, 239, 191, 189, 127, 239, 191, 189, 125, 7, 217, 35, 94, 49, 53, 51, 52, 51, 53, 52, 51, 53, 46, 50, 51, 52, 51, 52, 53, 50, 51, 53, 54, 46, 51, 50, 53, 52, 50, 52, 53, 52, 51, 53, 52, 51, 53, 145, 217, 52, 239, 191, 189, 239, 191, 189, 116, 126, 96, 239, 191, 189, 239, 191, 189, 239, 191, 189, 94, 239, 191, 189, 239, 191, 189, 44, 239, 191, 189, 239, 191, 189, 58, 71, 239, 191, 189, 239, 191, 189, 60, 239, 191, 189, 239, 191, 189, 239, 191, 189, 101, 126, 145, 146, 217, 44, 239, 191, 189, 89, 239, 191, 189, 79, 239, 191, 189, 103, 199, 190, 239, 191, 189, 239, 191, 189, 122, 3, 239, 191, 189, 71, 116, 83, 28, 239, 191, 189, 32, 239, 191, 189, 239, 191, 189, 239, 191, 189, 39, 45, 161, 42, 145, 146, 217, 49, 15, 239, 191, 189, 101, 239, 191, 189, 87, 91, 239, 191, 189, 66, 239, 191, 189, 239, 191, 189, 70, 239, 191, 189, 239, 191, 189, 111, 46, 239, 191, 189, 239, 191, 189, 112, 30, 239, 191, 189, 117, 108, 35, 239, 191, 189, 239, 191, 189, 161, 42, 145, 146, 217, 45, 66, 239, 191, 189, 115, 48, 113, 239, 191, 189, 239, 191, 189, 117, 49, 239, 191, 189, 54, 239, 191, 189, 39, 239, 191, 189, 12, 48, 114, 227, 165, 184, 239, 191, 189, 116, 239, 191, 189, 239, 191, 189, 239, 191, 189, 161, 42, 206, 13, 246, 33, 212, 147, 147, 148, 172, 47, 104, 101, 108, 108, 111, 95, 119, 111, 114, 108, 100, 0, 172, 47, 104, 101, 108, 108, 111, 95, 119, 111, 114, 108, 100, 147, 0, 0, 205, 2, 132, 148, 164, 47, 117, 115, 114, 0, 164, 47, 117, 115, 114, 147, 0, 0, 205, 2, 132, 148, 168, 47, 117, 115, 114, 47, 98, 105, 110, 0, 168, 47, 117, 115, 114, 47, 98, 105, 110, 147, 0, 0, 205, 2, 132, 145, 149, 183, 47, 104, 101, 108, 108, 111, 95, 119, 111, 114, 108, 100, 47, 104, 101, 108, 108, 111, 119, 111, 114, 108, 100, 217, 64, 99, 98, 48, 54, 53, 57, 52, 50, 53, 52, 52, 54, 98, 100, 55, 57, 101, 55, 54, 57, 57, 101, 56, 53, 56, 48, 52, 49, 55, 52, 56, 100, 101, 97, 97, 101, 56, 52, 50, 51, 102, 54, 51, 101, 54, 102, 101, 97, 102, 57, 48, 55, 98, 102, 98, 98, 57, 51, 52, 53, 97, 51, 50, 98, 147, 0, 0, 205, 2, 132, 0, 183, 47, 104, 101, 108, 108, 111, 95, 119, 111, 114, 108, 100, 47, 104, 101, 108, 108, 111, 119, 111, 114, 108, 100, 145, 147, 183, 47, 104, 101, 108, 108, 111, 95, 119, 111, 114, 108, 100, 47, 104, 101, 108, 108, 111, 119, 111, 114, 108, 100, 0, 179, 47, 117, 115, 114, 47, 98, 105, 110, 47, 104, 101, 108, 108, 111, 119, 111, 114, 108, 100]
+    }
+
+    #[allow(unused)]
     pub fn get_test_privkey() -> PrivateKey {
         PrivateKey::from_anonymous(&"AWxDWGKXZZOndWlvY5gvsbLzeRJEFpueNUoR/VCDKXMtBoeIyZoHATvrJWgu5vG2XlEqAbZuUGtCRERaa2aBPw==".to_string()).unwrap()
     }
@@ -133,9 +138,112 @@ mod libmangrove_tests_common {
     pub fn get_test_repo_baseurl() -> Url {
         Url::parse("https://example.com/mangrove/tests/").unwrap()
     }
+
     #[allow(unused)]
     pub fn get_test_repo_repoinfo() -> Url {
         Url::parse("https://example.com/mangrove/tests/repoinfo").unwrap()
+    }
+
+    #[allow(unused)]
+    pub fn get_test_nonsense_package() -> Package {
+        // test_package@v1, if this changes the below byte repr also has to be updated!
+        let pkg: Package = Package {
+            pkgname: "Y]Ѹ���T^X�*���:39:".to_string(),
+            pkgver: Version { major: 999, minor: 999, patch: 999, pre: Prerelease::EMPTY, build: BuildMetadata::EMPTY },
+            shortdesc: "	Eu�`���	���".to_string(),
+            longdesc: Some("$�4COb����� �oXd9@*��Y�}�u�c&n���u>.l,N�՟�-�I����N��<�lt�~���>�N��AR�
+�d����b���{0C�y	Iȓ�bj�n��OS�^+���3*�=��Ȏ".to_string()),
+            arch: Architecture::amd64,
+            url: Some("p9Sd�s�%��H@J�舍�-��$��".to_string()),
+            license: Some("�-�c�
+                          ���f��RW�*�U1F
+                          ".to_string()),
+            groups: Some(vec!["4O���K�B�?ЇX�2��.��57�".to_string(), "a͢�L1�3��A��O?}�
+k!�h�".to_string()]),
+            depends: Some(vec![PkgSpec {
+                pkgname: "�?=����k�peq�g8/��x��8s".to_string(),
+                version: VersionReq { comparators: vec![] },
+            }, PkgSpec {
+                pkgname: "�5OB:?
+?���|E��|�K��}".to_string(),
+                version: VersionReq::parse("153435435.2343452356.3254245435435").unwrap(),
+            }]),
+            optdepends: Some(vec!["��t~`���^��,��:G��<���e~".to_string()]),
+            provides: Some(vec![
+                PkgSpec {
+                    pkgname: "�Y�O�gǾ��z�GtS� ���'-".to_string(),
+                    version: VersionReq { comparators: vec![] },
+                }
+            ]),
+            conflicts: Some(vec![
+                PkgSpec {
+                    pkgname: "�e�W[�B��F��o.��p�ul#��".to_string(),
+                    version: VersionReq { comparators: vec![] },
+                }
+            ]),
+            replaces: Some(vec![
+                PkgSpec {
+                    pkgname: "B�s0q��u1�6�'�0r㥸�t���".to_string(),
+                    version: VersionReq { comparators: vec![] },
+                }
+            ]),
+            installed_size: 234234324,
+            pkgcontents: PackageContents {
+                folders: Some(vec![
+                    PackageFolder {
+                        name: "/hello_world".to_string(),
+                        mtime: 0,
+                        installpath: "/hello_world".to_string(),
+                        meta: FileMetadata {
+                            owner: 0,
+                            group: 0,
+                            permissions: 644,
+                        },
+                    },
+                    PackageFolder {
+                        name: "/usr".to_string(),
+                        mtime: 0,
+                        installpath: "/usr".to_string(),
+                        meta: FileMetadata {
+                            owner: 0,
+                            group: 0,
+                            permissions: 644,
+                        },
+                    },
+                    PackageFolder {
+                        name: "/usr/bin".to_string(),
+                        mtime: 0,
+                        installpath: "/usr/bin".to_string(),
+                        meta: FileMetadata {
+                            owner: 0,
+                            group: 0,
+                            permissions: 644,
+                        },
+                    },
+                ]),
+                files: Some(vec![
+                    PackageFile {
+                        name: "/hello_world/helloworld".to_string(),
+                        sha256: "cb0659425446bd79e7699e858041748deaae8423f63e6feaf907bfbb9345a32b".to_string(),
+                        meta: FileMetadata {
+                            owner: 0,
+                            group: 0,
+                            permissions: 644,
+                        },
+                        mtime: 0,
+                        installpath: "/hello_world/helloworld".to_string(),
+                    }
+                ]),
+                links: Some(vec![
+                    PackageLink {
+                        file: "/hello_world/helloworld".to_string(),
+                        mtime: 0,
+                        target: "/usr/bin/helloworld".to_string(),
+                    }
+                ]),
+            },
+        };
+        pkg
     }
 }
 
@@ -150,7 +258,7 @@ mod libmangrove_pkg_tests {
     use crate::crypt::is_signed_package;
     use crate::file::FileOps;
     use crate::pkg::{extract_pkg_to, get_pkg_filename, Package, save_package, save_package_signed};
-    use crate::test::libmangrove_tests_common::{get_test_package, get_test_package_bytes, get_test_privkey, logging};
+    use crate::test::libmangrove_tests_common::{get_test_nonsense_package, get_test_nonsense_package_bytes, get_test_package, get_test_package_bytes, get_test_privkey};
 
     #[test]
     fn package_serialization() {
@@ -268,6 +376,95 @@ mod libmangrove_pkg_tests {
         }
         let data: Vec<u8> = fs::read(format!("{}/../test/test-package/test_0.0.1_amd64.mgve", env::current_dir().unwrap().to_str().unwrap())).unwrap();
         extract_pkg_to(&data, format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).unwrap();
+    }
+
+    #[test]
+    fn package_serialization_nonsense() {
+        let pkg = get_test_nonsense_package();
+        let serialized: Vec<u8> = rmp_serde::to_vec(&pkg).unwrap();
+        println!("{:?}", serialized);
+        let expect: Vec<u8> = get_test_nonsense_package_bytes();
+        assert_eq!(serialized, expect);
+    }
+
+    #[test]
+    fn package_deserialization_nonsense() {
+        let serialized: Vec<u8> = get_test_nonsense_package_bytes();
+        let deserialized: Package = rmp_serde::from_slice(&serialized[..]).unwrap();
+        let expect: Package = get_test_nonsense_package();
+        assert_eq!(deserialized, expect);
+    }
+
+    #[test]
+    fn package_save_to_file_does_not_exist_nonsense() {
+        // Get a test package
+        let package: Package = get_test_nonsense_package();
+        // Try to write
+        assert!(Package::as_file(&package, "/path/nonexistent-file-nonsense/".to_string()).is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn package_save_to_file_without_permissions_nonsense() {
+        let package: Package = get_test_nonsense_package();
+        Package::as_file(&package, "/root/cant-write-here-nonsense/".to_string()).unwrap();
+    }
+
+    #[test]
+    #[serial] // If run concurrently with package_saving_signed, will fail
+    fn package_saving_nonsense() {
+        println!("{:?}", env::current_dir().unwrap());
+        match save_package(
+            &get_test_nonsense_package(),
+            format!("{}/../test/test-package-nonsense", env::current_dir().unwrap().to_str().unwrap()),
+        ) {
+            Ok(_) => (),
+            Err(err) => {
+                panic!("{}", err);
+            }
+        }
+    }
+
+    #[test]
+    #[serial] // If run concurrently with package_saving, will fail
+    fn package_saving_signed_nonsense() {
+        match save_package_signed(
+            &get_test_nonsense_package(),
+            format!("{}/../test/test-package-signed-nonsense", env::current_dir().unwrap().to_str().unwrap()),
+            get_test_privkey(),
+        ) {
+            Ok(_) => (),
+            Err(err) => panic!("{}", err),
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn package_validating_signed_nonsense() {
+        match save_package_signed(
+            &get_test_nonsense_package(),
+            format!("{}/../test/test-package-nonsense", env::current_dir().unwrap().to_str().unwrap()),
+            get_test_privkey(),
+        ) {
+            Ok(_) => (),
+            Err(err) => panic!("{}", err),
+        };
+        let fname = format!("../test/test-package/{}", get_pkg_filename(&get_test_package()));
+        let signed_package_data = fs::read(fname).unwrap();
+        assert!(is_signed_package(signed_package_data));
+    }
+
+    #[test]
+    fn package_fileops_load_nonsense() {
+        match Package::as_file(&get_test_nonsense_package(), "../test/test_pkginfo_nonsense".parse().unwrap()) {
+            Ok(_) => (),
+            Err(e) => panic!("{}", e),
+        };
+        let newpkg = match Package::from_file("../test/test_pkginfo_nonsense".parse().unwrap()) {
+            Ok(p) => p,
+            Err(e) => panic!("{}", e),
+        };
+        assert_eq!(newpkg, get_test_nonsense_package());
     }
 }
 
