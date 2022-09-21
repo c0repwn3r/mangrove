@@ -18,6 +18,6 @@ steps:
     access_key: epheKWSu3IWFOi8v
     secret_key: IYlH8yLThJeLPm7P5esnD6QT96cHxcw3
     source: target/*/mgve
-    target: /ci/$DRONE_COMMIT/
+    target: /ci/${DRONE_COMMIT}/
     path_style: true
     strip_prefix: "target/"
