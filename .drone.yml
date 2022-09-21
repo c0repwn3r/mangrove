@@ -10,3 +10,13 @@ steps:
   image: rustlang/rust:nightly
   commands:
     - cargo test --verbose --all
+- name: upload
+  image: plugins/s3
+  settings:
+    endpoint: https://s3.e3t.cc
+    bucket: mangrove-artifacts
+    access_key: epheKWSu3IWFOi8v
+    secret_key: IYlH8yLThJeLPm7P5esnD6QT96cHxcw3
+    source: target/*/mgve
+    target: /ci/
+    path_style: true
