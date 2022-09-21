@@ -496,7 +496,7 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
     debug!("archive load success");
     if let Some(folders) = pkginfo.pkgcontents.folders {
         for folder in folders {
-            debug!("creating directory {}", folder.installpath);
+            debug!("creating directory {}", format!("{}{}", target, folder.installpath));
             create_dir_all(format!("{}{}", target, folder.installpath))?;
         }
     }

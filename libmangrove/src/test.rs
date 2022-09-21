@@ -11,6 +11,11 @@ mod libmangrove_tests_common {
     use crate::platform::Architecture;
 
     #[allow(unused)]
+    pub fn logging() {
+        simple_logger::init().unwrap();
+    }
+
+    #[allow(unused)]
     pub fn get_test_package() -> Package {
         // test_package@v1, if this changes the below byte repr also has to be updated!
         let pkg: Package = Package {
@@ -138,13 +143,14 @@ mod libmangrove_tests_common {
 mod libmangrove_pkg_tests {
     use std::env;
     use std::fs;
+    use std::fs::remove_dir_all;
 
     use serial_test::serial;
 
     use crate::crypt::is_signed_package;
     use crate::file::FileOps;
     use crate::pkg::{extract_pkg_to, get_pkg_filename, Package, save_package, save_package_signed};
-    use crate::test::libmangrove_tests_common::{get_test_package, get_test_package_bytes, get_test_privkey};
+    use crate::test::libmangrove_tests_common::{get_test_package, get_test_package_bytes, get_test_privkey, logging};
 
     #[test]
     fn package_serialization() {
@@ -250,6 +256,7 @@ mod libmangrove_pkg_tests {
     #[test]
     #[serial]
     fn package_extracting() {
+        remove_dir_all(format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).unwrap();
         match save_package(
             &get_test_package(),
             format!("{}/../test/test-package", env::current_dir().unwrap().to_str().unwrap()),
