@@ -252,6 +252,7 @@ mod libmangrove_pkg_tests {
     use std::env;
     use std::fs;
     use std::fs::remove_dir_all;
+    use std::path::Path;
 
     use serial_test::serial;
 
@@ -364,7 +365,9 @@ mod libmangrove_pkg_tests {
     #[test]
     #[serial]
     fn package_extracting() {
-        remove_dir_all(format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).unwrap();
+        if Path::new(&format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).exists() {
+            remove_dir_all(format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).unwrap();
+        }
         match save_package(
             &get_test_package(),
             format!("{}/../test/test-package", env::current_dir().unwrap().to_str().unwrap()),
