@@ -136,13 +136,14 @@ mod libmangrove_tests_common {
 
 #[cfg(test)]
 mod libmangrove_pkg_tests {
-    use std::{env, fs};
+    use std::env;
+    use std::fs;
 
     use serial_test::serial;
 
     use crate::crypt::is_signed_package;
     use crate::file::FileOps;
-    use crate::pkg::{get_pkg_filename, Package, save_package, save_package_signed};
+    use crate::pkg::{extract_pkg_to, get_pkg_filename, Package, save_package, save_package_signed};
     use crate::test::libmangrove_tests_common::{get_test_package, get_test_package_bytes, get_test_privkey};
 
     #[test]
@@ -244,6 +245,22 @@ mod libmangrove_pkg_tests {
     #[should_panic]
     fn package_fileops_load_not_a_real_package() {
         Package::from_file("./test/test-package/hello_world/helloworld".parse().unwrap()).unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn package_extracting() {
+        match save_package(
+            &get_test_package(),
+            format!("{}/../test/test-package", env::current_dir().unwrap().to_str().unwrap()),
+        ) {
+            Ok(_) => (),
+            Err(err) => {
+                panic!("{}", err);
+            }
+        }
+        let data: Vec<u8> = fs::read(format!("{}/../test/test-package/test_0.0.1_amd64.mgve", env::current_dir().unwrap().to_str().unwrap())).unwrap();
+        extract_pkg_to(&data, format!("{}/../test/fakeroot", env::current_dir().unwrap().to_str().unwrap())).unwrap();
     }
 }
 

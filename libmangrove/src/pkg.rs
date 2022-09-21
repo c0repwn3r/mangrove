@@ -5,6 +5,8 @@ use std::error::Error;
 use std::fmt::Debug;
 use std::fs::{self, create_dir_all, File, remove_dir_all, remove_file};
 use std::io::{Cursor, Read};
+use std::os::unix::fs::symlink;
+use log::debug;
 
 use serde::{Deserialize, Serialize};
 use tar::{Archive, Builder};
@@ -480,10 +482,44 @@ pub fn dump_package(pkg: &Package) {
     println!("| Links: {}", show_opt(pkg.pkgcontents.links.as_ref()));
     println!("== End Package Dump ==");
 }
-/*
+
 // extract_pkg_to
 /// Extract a &Package to the given target directory, performing validation as it goes.
-pub fn extract_pkg_to(package: &Package, target: PathBuf) {
+/// # Errors
+/// Once again, due to the amount of filesystem operations there are too many things to list here.
+pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn Error>> {
+    debug!("extract package atl to {}", target);
+    let pkginfo = load_package(package)?;
+    debug!("pkginfo load success");
+    // package is valid, open the archive
+    let mut archive = Archive::new(Decoder::new(Cursor::new(package))?);
+    debug!("archive load success");
+    if let Some(folders) = pkginfo.pkgcontents.folders {
+        for folder in folders {
+            debug!("creating directory {}", folder.installpath);
+            create_dir_all(format!("{}{}", target, folder.installpath))?;
+        }
+    }
+    if let Some(files) = pkginfo.pkgcontents.files {
 
+        for file_raw in archive.entries()? {
+            let mut file = file_raw?;
+            for f_to_extract in &files {
+                if f_to_extract.installpath == match file.path()?.to_str() {
+                    Some(f) => f,
+                    None => return Err("Failed to convert string types".into())
+                }.to_string() {
+                    let mut data: Vec<u8> = vec![];
+                    file.read_to_end(&mut data)?;
+                    fs::write(format!("{}{}", target, &f_to_extract.installpath), data)?;
+                }
+            }
+        }
+    }
+    if let Some(links) = pkginfo.pkgcontents.links {
+        for link in links {
+            symlink(format!("{}{}", target, link.file), format!("{}{}", target, link.target))?;
+        }
+    }
+    Ok(())
 }
- */

@@ -547,6 +547,7 @@ dependencies = [
  "git-version",
  "hex",
  "lockfile",
+ "log",
  "rand 0.7.3",
  "rand 0.8.5",
  "rmp-serde",
