@@ -2,8 +2,11 @@ kind: pipeline
 name: default
 
 steps:
+- name: build
+  image: rustlang/rust:nightly
+  commands:
+    - cargo build
 - name: tests
   image: rustlang/rust:nightly
   commands:
-  - cargo build --verbose --all
-  - cargo test --verbose --all
+    - cargo test --verbose --all
