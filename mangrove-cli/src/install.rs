@@ -7,7 +7,7 @@ use clap::{Parser, ArgAction};
 use human_bytes::human_bytes;
 use libmangrove::crypt::{decrypt_package, find_key, is_signed_package};
 use libmangrove::pkg::{get_pkg_filename, load_package, Package};
-use libmangrove::pkgdb::pkgdb_load;
+use libmangrove::pkgdb::{pkgdb_load, pkgdb_save};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
 use crate::{err, ExecutableCommand};
 use crate::util::{info, warn};
@@ -143,7 +143,7 @@ impl ExecutableCommand for InstallCommand {
             }
         }
 
-        println!("Resolving dependencies...");
+        println!("Resolving dependencies..\n");
         // TODO: real dependency resolution here, add missing packages
         for (_, pkginfo) in &packages_to_install {
             if let Some(dependencies) = &pkginfo.depends {
@@ -156,7 +156,9 @@ impl ExecutableCommand for InstallCommand {
             }
         }
 
-        println!("To install:\n");
+        pkgdb_save(pkgdb, self.local)?;
+
+        println!("To install:");
         println!("Number\tName\tVersion\tSize");
         let mut total_size = 0;
         let mut i = 1;
