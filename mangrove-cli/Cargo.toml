@@ -16,3 +16,4 @@ colored = "2.0.0"
 serde = { version = "1.0.144", features = ["derive"] }
 version = { version = "1.0.7", features = ["serde"], package="semver" }
 toml = "0.5.9"
+human_bytes = { version = "0.3", features = ["bibytes"] }

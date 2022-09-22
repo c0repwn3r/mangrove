@@ -1,11 +1,11 @@
-pkgname = "test"
-pkgver = "0.0.1"
+pkgname = "test_2"
+pkgver = "0.1.1"
 shortdesc = "A test package, used in Mangrove unit tests"
 longdesc = "A test package, used in Mangrove unit tests"
 arch = "amd64"
 url = "https://mgve.cc"
 license = "GNU-GPL-3-or-later"
-depends = [{pkgname = "test-data", version = "*"}, {pkgname = "test-data-2", version = "0.0.0"}]
+depends = []
 groups = ["thisisgroup1", "thisisgroup2"]
 optdepends = ["test-opt: for doing something else"]
 provides = [
