@@ -255,11 +255,15 @@ mod libmangrove_pkg_tests {
     use std::path::Path;
 
     use serial_test::serial;
+    use version::{BuildMetadata, Prerelease, Version, VersionReq};
 
     use crate::crypt::is_signed_package;
     use crate::file::FileOps;
-    use crate::pkg::{extract_pkg_to, get_pkg_filename, Package, save_package, save_package_signed};
+    use crate::pkg::{extract_pkg_to, get_pkg_filename, install_pkg_to, Package, PackageContents, PkgSpec, save_package, save_package_signed};
+    use crate::pkgdb::{pkgdb_load, pkgdb_save};
+    use crate::platform::Architecture;
     use crate::test::libmangrove_tests_common::{get_test_nonsense_package, get_test_nonsense_package_bytes, get_test_package, get_test_package_bytes, get_test_privkey};
+    use crate::version_any;
 
     #[test]
     fn package_serialization() {
@@ -446,13 +450,15 @@ mod libmangrove_pkg_tests {
     fn package_validating_signed_nonsense() {
         match save_package_signed(
             &get_test_nonsense_package(),
-            format!("{}/../test/test-package-nonsense", env::current_dir().unwrap().to_str().unwrap()),
+            format!("{}/../test/test-package-signed-nonsense", env::current_dir().unwrap().to_str().unwrap()),
             get_test_privkey(),
         ) {
             Ok(_) => (),
             Err(err) => panic!("{}", err),
         };
-        let fname = format!("../test/test-package/{}", get_pkg_filename(&get_test_package()));
+        println!("{}", env::current_dir().unwrap().to_str().unwrap());
+        let fname = format!("{}/../test/test-package-signed-nonsense/{}", env::current_dir().unwrap().to_str().unwrap(), get_pkg_filename(&get_test_nonsense_package()));
+        println!("{}", fname);
         let signed_package_data = fs::read(fname).unwrap();
         assert!(is_signed_package(signed_package_data));
     }
@@ -468,6 +474,125 @@ mod libmangrove_pkg_tests {
             Err(e) => panic!("{}", e),
         };
         assert_eq!(newpkg, get_test_nonsense_package());
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic]
+    fn package_installation_dependency_missing() {
+        let cwd = env::current_dir().unwrap().to_str().unwrap().to_string();
+        let fakeroot = format!("{}/../test/package-installation-fakeroot", cwd);
+
+        if Path::new(&fakeroot).exists() { remove_dir_all(&fakeroot).unwrap(); }
+
+        save_package(&get_test_package(), format!("{}/../test/package-installation", cwd)).unwrap();
+
+        // lock the database
+        let mut db = pkgdb_load(true).unwrap();
+
+        // install the package
+        let res = install_pkg_to(&fs::read(format!("{}/../test/package-installation/test_0.0.1_amd64.mgve", cwd)).unwrap(), fakeroot, &mut db);
+        // save it
+        pkgdb_save(db, true).unwrap();
+
+        res.unwrap()
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic]
+    fn package_installation_conflicts_us() {
+        let cwd = env::current_dir().unwrap().to_str().unwrap().to_string();
+        let fakeroot = format!("{}/../test/package-installation-fakeroot", cwd);
+
+        if Path::new(&fakeroot).exists() { remove_dir_all(&fakeroot).unwrap(); }
+
+        save_package(&get_test_package(), format!("{}/../test/package-installation", cwd)).unwrap();
+
+        // lock the database
+        let mut db = pkgdb_load(true).unwrap();
+
+        let dependency = Package {
+            pkgname: "test_2".to_string(),
+            pkgver: Version { major: 0, minor: 0, patch: 1, pre: Prerelease::EMPTY, build: BuildMetadata::EMPTY },
+            shortdesc: "A test package, used in Mangrove unit tests".to_string(),
+            longdesc: None,
+            arch: Architecture::amd64,
+            url: None,
+            license: None,
+            groups: None,
+            depends: None,
+            optdepends: None,
+            provides: None,
+            conflicts: Some(vec![
+                PkgSpec {
+                    pkgname: "test".to_string(),
+                    version: version_any!(),
+                }
+            ]),
+            replaces: None,
+            installed_size: 234234324,
+            pkgcontents: PackageContents {
+                folders: Some(vec![]),
+                files: Some(vec![]),
+                links: Some(vec![]),
+            },
+        };
+        db.db.installed_packages.push(dependency);
+
+        // install the package
+        let res = install_pkg_to(&fs::read(format!("{}/../test/package-installation/test_0.0.1_amd64.mgve", cwd)).unwrap(), fakeroot, &mut db);
+        db.db.installed_packages.remove(db.db.installed_packages.len() - 1);
+        // save it
+        pkgdb_save(db, true).unwrap();
+
+        res.unwrap();
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic]
+    fn package_installation_conflicts_them() {
+        let cwd = env::current_dir().unwrap().to_str().unwrap().to_string();
+        let fakeroot = format!("{}/../test/package-installation-fakeroot", cwd);
+
+        if Path::new(&fakeroot).exists() { remove_dir_all(&fakeroot).unwrap(); }
+
+        save_package(&get_test_package(), format!("{}/../test/package-installation", cwd)).unwrap();
+
+        // lock the database
+        let mut db = pkgdb_load(true).unwrap();
+
+        let dependency = Package {
+            pkgname: "conflicting_package".to_string(),
+            pkgver: Version { major: 0, minor: 0, patch: 1, pre: Prerelease::EMPTY, build: BuildMetadata::EMPTY },
+            shortdesc: "A test package, used in Mangrove unit tests".to_string(),
+            longdesc: None,
+            arch: Architecture::amd64,
+            url: None,
+            license: None,
+            groups: None,
+            depends: None,
+            optdepends: None,
+            provides: None,
+            conflicts: None,
+            replaces: None,
+            installed_size: 234234324,
+            pkgcontents: PackageContents {
+                folders: Some(vec![]),
+                files: Some(vec![]),
+                links: Some(vec![]),
+            },
+        };
+        db.db.installed_packages.push(dependency);
+
+        // install the package
+        let res = install_pkg_to(&fs::read(format!("{}/../test/package-installation/test_0.0.1_amd64.mgve", cwd)).unwrap(), fakeroot, &mut db);
+        db.db.installed_packages.remove(db.db.installed_packages.len() - 1);
+        // save it
+        pkgdb_save(db, true).unwrap();
+
+        res.unwrap();
     }
 }
 
@@ -485,10 +610,11 @@ mod libmangrove_repository_tests {
 
 #[cfg(test)]
 mod libmangrove_mcrypt_tests {
+    use serial_test::serial;
+
     use crate::aes::{AES128Cipher, AES192Cipher, AES256Cipher};
     use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, PrivateKey};
     use crate::test::libmangrove_tests_common::{get_test_package_bytes, get_test_privkey, get_test_pubkey};
-    use serial_test::serial;
     use crate::trustcache::{allow_pk, allow_sk, clear_pk, clear_sk, trustcache_load, trustcache_save};
 
     #[test]
@@ -644,9 +770,9 @@ mod libmangrove_lockfile_tests {
 #[cfg(test)]
 mod libmangrove_database_tests {
     use serial_test::serial;
+
     use crate::config::get_pkgdb_file;
     use crate::pkgdb::{pkgdb_load, pkgdb_save};
-
     use crate::trustcache::{trustcache_load, trustcache_save};
 
     #[test]

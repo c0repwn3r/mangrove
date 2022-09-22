@@ -6,8 +6,8 @@ use std::fmt::Debug;
 use std::fs::{self, create_dir_all, File, remove_dir_all, remove_file};
 use std::io::{Cursor, Read};
 use std::os::unix::fs::symlink;
-use log::debug;
 
+use log::debug;
 use serde::{Deserialize, Serialize};
 use tar::{Archive, Builder};
 use uuid::Uuid;
@@ -21,6 +21,7 @@ use crate::{
     platform::{arch_str, Architecture}
 };
 use crate::crypt::mcrypt_sha256_raw;
+use crate::pkgdb::PackageDb;
 
 //
 // Package
@@ -412,14 +413,12 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
         } else {
             let mut fdat: Vec<u8> = vec![];
             entry.read_to_end(&mut fdat)?;
-            println!("pkgdataINFO {:?}", fdat);
             hashes.insert(format!("/{}", match entry.path()?.to_str() {
                 Some(f) => f,
                 None => {
                     return Err("Failed to convert string".into())
                 }
             }), hex::encode(mcrypt_sha256_raw(&fdat[..])));
-            println!("pkgdatadump {:?} {}", &fdat[..], hex::encode(&fdat[..]));
         }
     }
     if pkginfo.is_none() {
@@ -430,7 +429,6 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
         Some(p) => p,
         None => return Err("Pkginfo data missing after check".into())
     };
-    println!("{:?}", pkg.pkgcontents);
     if pkg.pkgcontents.files.is_some() {
         let files = match &pkg.pkgcontents.files {
             Some(f) => f,
@@ -444,8 +442,6 @@ pub fn load_package(data: &Vec<u8>) -> Result<Package, Box<dyn Error>> {
                 Some(h) => h,
                 None => return Err(format!("Hash for {} is missing", file.name).into())
             };
-            println!("{:?}", hashes);
-            println!("{} {}", hash, &file.sha256);
             if hash != &file.sha256 {
                 return Err(format!("Fatal error: hash verification failed for {} (expected {} got {})", file.name, file.sha256, hash).into())
             }
@@ -521,5 +517,52 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
             symlink(format!("{}{}", target, link.file), format!("{}{}", target, link.target))?;
         }
     }
+    Ok(())
+}
+
+
+// install_pkg_to
+/// Install a package to the target directory. Performs package validation, dependency checking, and conflict checking.
+/// # Errors
+/// Once again, due to the amount of filesystem operations there are too many things to list here.
+pub fn install_pkg_to(package: &Vec<u8>, target: String, db: &mut PackageDb) -> Result<(), Box<dyn Error>> {
+    let pkginfo = load_package(package)?;
+
+    // Sanity checking: there shouldn't be another package with this name
+    if let Some(_) = db.db.installed_packages.iter().find(|x| x.pkgname == pkginfo.pkgname) {
+        return Err(format!("{} is already installed", pkginfo.pkgname).into())
+    }
+
+    for pkg in &db.db.installed_packages {
+        // Conflict checking: another package lists this one as a conflict
+        if let Some(conflicts) = &pkg.conflicts {
+            let conflicting = conflicts.iter().find(|x| x.pkgname == pkginfo.pkgname && x.version.matches(&pkginfo.pkgver));
+            if let Some(conflict) = conflicting {
+                return Err(format!("This package conflicts with {}, remove it first", conflict.pkgname).into());
+            }
+        }
+        // Conflict checking: this package lists another one as a conflict
+        if let Some(conflicts) = &pkginfo.conflicts {
+            let conflicting = conflicts.iter().find(|x| x.pkgname == pkginfo.pkgname && x.version.matches(&pkginfo.pkgver));
+            if let Some(conflict) = conflicting {
+                return Err(format!("This package conflicts with {}, remove it first", conflict.pkgname).into());
+            }
+        }
+    }
+    // No conflicts
+    // Dependency checking
+    if let Some(dependencies) = &pkginfo.depends {
+        for dependency in dependencies {
+            if !&db.db.installed_packages.iter().any(|x| x.pkgname == dependency.pkgname && dependency.version.matches(&x.pkgver)) {
+                return Err(format!("Required dependency {} not installed", dependency.pkgname).into());
+            }
+        }
+    }
+    // Good to go!
+    // Extract package files
+    extract_pkg_to(package, target)?;
+    // Add to package database
+    db.db.installed_packages.push(pkginfo);
+    // All done!
     Ok(())
 }

@@ -4,12 +4,15 @@
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+
 use lockfile::Lockfile;
+
 use crate::config::get_pkgdb_file;
 use crate::db::Database;
 use crate::lock::lock_packages;
 
 #[allow(dead_code)] // idk why this is warned. this is literally immediately constructed right below here
+#[derive(Debug)]
 pub struct PackageDb {
     /// The packagedb Lockfile, to ensure a mutex lock on the pkgdb while it is being operated upon
     pub lockfile: Lockfile,
