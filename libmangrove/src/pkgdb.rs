@@ -13,6 +13,7 @@ use crate::lock::lock_packages;
 
 #[allow(dead_code)] // idk why this is warned. this is literally immediately constructed right below here
 #[derive(Debug)]
+/// Represents a lockfile for the pkgdb and the actual db data
 pub struct PackageDb {
     /// The packagedb Lockfile, to ensure a mutex lock on the pkgdb while it is being operated upon
     pub lockfile: Lockfile,

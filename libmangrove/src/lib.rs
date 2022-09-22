@@ -40,7 +40,7 @@ pub mod aes; // AES helper functions
 pub mod config; // Configuration
 pub mod lock; // Lockfiles
 pub mod trustcache;
-mod pkgdb; // Trustcache management
+pub mod pkgdb; // Trustcache management
 
 // Version stuff //
 /// Get the cargo package version

@@ -19,6 +19,7 @@ use libmangrove::{detailed_version, version};
 use crate::cli::ExecutableCommand;
 use crate::create::CreateCommand;
 use crate::inspect::InspectCommand;
+use crate::install::InstallCommand;
 use crate::trust::TrustCommand;
 use crate::util::err;
 
@@ -28,6 +29,7 @@ mod create;
 mod util;
 mod mgvetoml;
 mod trust;
+mod install;
 
 #[derive(Parser)]
 #[clap(name = "mgve", about = "Mangrove CLI interface", version, author)]
@@ -53,7 +55,9 @@ pub enum MangroveCLIOptions {
     #[clap(name = "create")]
     Create(CreateCommand),
     #[clap(name = "trust")]
-    Trust(TrustCommand)
+    Trust(TrustCommand),
+    #[clap(name = "install")]
+    Install(InstallCommand)
 }
 
 impl ExecutableCommand for MangroveCLI {
@@ -73,7 +77,8 @@ impl ExecutableCommand for MangroveCLI {
         match &self.command.as_ref().unwrap() {
             MangroveCLIOptions::Inspect(inspect) => inspect.execute()?,
             MangroveCLIOptions::Create(create) => create.execute()?,
-            MangroveCLIOptions::Trust(trust) => trust.execute()?
+            MangroveCLIOptions::Trust(trust) => trust.execute()?,
+            MangroveCLIOptions::Install(install) => install.execute()?
         };
         Ok(())
     }
