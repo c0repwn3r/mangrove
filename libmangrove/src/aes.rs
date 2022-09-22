@@ -18,6 +18,7 @@ aes_cipher!(AES256Cipher, Aes256, 32);
 // aes_cipher!
 /// This macro is used to generate the AES???Cipher structs. It is not useful otherwise.
 #[macro_export]
+#[allow(clippy::module_name_repetitions)]
 macro_rules! aes_cipher {
     ($struct_name:ident,$crypto_backend:tt,$ks:expr) => {
         /// A wrapper around a bare AES construct.

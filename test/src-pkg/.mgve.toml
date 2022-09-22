@@ -1,5 +1,5 @@
-pkgname = "test_2"
-pkgver = "0.1.1"
+pkgname = "test-data-2"
+pkgver = "0.0.0"
 shortdesc = "A test package, used in Mangrove unit tests"
 longdesc = "A test package, used in Mangrove unit tests"
 arch = "amd64"

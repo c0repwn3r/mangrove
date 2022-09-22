@@ -61,3 +61,5 @@ pub fn detailed_version() -> String {
             pkgver(), gitver(), env!("BUILD_HOSTNAME"), env!("BUILD_TIMESTAMP"), env!("GIT_BRANCH"), env!("GIT_COMMIT_SHORT"), env!("GIT_DIRTY"), env!("RUST_CHANNEL"),
             env!("RUSTC_VERSION"), env!("SOURCE_TIMESTAMP"))
 }
+/// Get the git branch at compile time
+pub fn gitbranch() -> String { env!("GIT_BRANCH").to_string() }

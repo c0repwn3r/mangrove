@@ -14,14 +14,14 @@ use std::error::Error;
 
 use clap::{AppSettings, ArgAction, Parser, Subcommand};
 
-use libmangrove::{detailed_version, version};
+use libmangrove::{detailed_version, gitbranch, version};
 
 use crate::cli::ExecutableCommand;
 use crate::create::CreateCommand;
 use crate::inspect::InspectCommand;
 use crate::install::InstallCommand;
 use crate::trust::TrustCommand;
-use crate::util::err;
+use crate::util::{err, warn};
 
 mod inspect;
 mod cli;
@@ -44,6 +44,9 @@ pub struct MangroveCLI {
     #[clap(short = 'V', long = "detailed_version", action = ArgAction::SetTrue, default_value_t = false, help = "Show detailed information about the version of libmangrove this binary is linked against")]
     show_lmg_version: bool,
 
+    #[clap(short = 'd', long = "debug", action = ArgAction::SetTrue, default_value_t = false, help = "Enable libmangrove debug logging. Is very spammy with very detailed output and may crash less powerful machines.")]
+    enable_logging: bool,
+
     #[clap(subcommand)]
     command: Option<MangroveCLIOptions>
 }
@@ -62,6 +65,13 @@ pub enum MangroveCLIOptions {
 
 impl ExecutableCommand for MangroveCLI {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
+        if self.enable_logging {
+            if std::env::var("MANGROVE_ENABLE_VERY_VERBOSE_DEBUG_LOGS").is_ok() || gitbranch() != "release" {
+                simple_logger::init().unwrap();
+            } else {
+                warn("Debug logs are very, very verbose. Since you are on a release build, please set MANGROVE_ENABLE_VERY_VERBOSE_DEBUG_LOGS=1 to prevent terminal flooding.".into());
+            }
+        }
         if self.show_version {
             println!("mangrove-cli {}, {}", env!("CARGO_PKG_VERSION"), version());
             return Ok(());

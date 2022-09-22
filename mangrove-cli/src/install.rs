@@ -5,6 +5,7 @@ use std::io::{Read, stdin, stdout, Write};
 use std::path::{Path};
 use clap::{Parser, ArgAction};
 use human_bytes::human_bytes;
+use tabwriter::TabWriter;
 use libmangrove::crypt::{decrypt_package, find_key, is_signed_package};
 use libmangrove::pkg::{get_pkg_filename, install_pkg_to, load_package, Package};
 use libmangrove::pkgdb::{pkgdb_load, pkgdb_save};
@@ -155,11 +156,17 @@ impl ExecutableCommand for InstallCommand {
         }
 
         println!("Resolving dependencies..");
+
+        let mut package_installation_queue: Vec<String> = vec![];
         // TODO: real dependency resolution here, add missing packages
         for (filename, pkginfo) in &packages_to_install {
             if let Some(dependencies) = &pkginfo.depends {
                 for dependency in dependencies {
                     if !&pkgdb.db.installed_packages.iter().any(|x| x.pkgname == dependency.pkgname && dependency.version.matches(&x.pkgver)) {
+                        if let Some(other_pkg) = &packages_to_install.iter().find(|(_, v)| v.pkgname == dependency.pkgname && dependency.version.matches(&v.pkgver)) {
+                            if !package_installation_queue.contains(&other_pkg.0.clone()) { package_installation_queue.push(other_pkg.0.clone()); }
+                            continue;
+                        }
                         if filename.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
                             println!("Deleting temporary file {}...", filename);
                             match fs::remove_file(filename) {
@@ -171,10 +178,11 @@ impl ExecutableCommand for InstallCommand {
                                 }
                             }
                         }
-                        err(format!("{} has required dependency {} that is not installed", pkginfo.pkgname, dependency.pkgname).into());
+                        err(format!("{} has required dependency {}{} that is not installed", pkginfo.pkgname, dependency.pkgname, dependency.version).into());
                         return Ok(())
                     }
                 }
+                if !package_installation_queue.contains(&filename.clone()) { package_installation_queue.push(filename.clone()); }
             }
             if pkgdb.db.installed_packages.iter().any(|x| x.pkgname == pkginfo.pkgname && pkginfo.pkgver >= x.pkgver) {
                 warn(format!("{} is up to date - reinstalling", pkginfo.pkgname));
@@ -185,14 +193,23 @@ impl ExecutableCommand for InstallCommand {
         pkgdb_save(pkgdb, self.local)?;
 
         println!("To install:");
-        println!("Number\tName\tVersion\tSize");
+        let mut tw = TabWriter::new(stdout());
+        write!(&mut tw, "Number\tName\tVersion\tSize\n")?;
         let mut total_size = 0;
         let mut i = 1;
-        for (_, package) in &packages_to_install {
-            println!("{}\t{}\t{}\t{}", i, package.pkgname, package.pkgver, human_bytes(package.installed_size as f64));
+        for package_name in &package_installation_queue {
+            let package = match packages_to_install.get(package_name) {
+                Some(p) => p,
+                None => {
+                    err(format!("failed to process installation queue: {}", package_name).into());
+                    return Ok(());
+                }
+            };
+            write!(&mut tw, "{}\t{}\t{}\t{}\n", i, package.pkgname, package.pkgver, human_bytes(package.installed_size as f64))?;
             total_size += package.installed_size;
             i+=1;
         }
+        tw.flush()?;
         println!("Total installed size: {}\n", human_bytes(total_size as f64));
 
         print!("Continue with installation: [Y/n] ");
@@ -208,7 +225,14 @@ impl ExecutableCommand for InstallCommand {
         println!("Installing packages...");
 
         let mut pkgdb = pkgdb_load(self.local)?;
-        for (file, pkg) in packages_to_install {
+        for file in package_installation_queue {
+            let pkg = match packages_to_install.get(&*file.clone()) {
+                Some(p) => p,
+                None => {
+                    err(format!("missing in installation queue: {}", file));
+                    return Ok(());
+                }
+            };
             let data = match fs::read(file.clone()) {
                 Ok(d) => d,
                 Err(e) => {

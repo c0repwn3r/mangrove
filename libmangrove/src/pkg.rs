@@ -6,6 +6,7 @@ use std::fmt::Debug;
 use std::fs::{self, create_dir_all, File, remove_dir_all, remove_file};
 use std::io::{Cursor, Read};
 use std::os::unix::fs::symlink;
+use std::path::Path;
 
 use log::debug;
 use serde::{Deserialize, Serialize};
@@ -492,21 +493,37 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
     debug!("archive load success");
     if let Some(folders) = pkginfo.pkgcontents.folders {
         for folder in folders {
+            if Path::new(&format!("{}{}", target, folder.installpath)).exists() {
+                debug!("removing directory {}", format!("{}{}", target, folder.installpath));
+                remove_dir_all(&format!("{}{}", target, folder.installpath))?;
+            }
             debug!("creating directory {}", format!("{}{}", target, folder.installpath));
             create_dir_all(format!("{}{}", target, folder.installpath))?;
         }
     }
     if let Some(files) = pkginfo.pkgcontents.files {
-
+        debug!("extracting files");
         for file_raw in archive.entries()? {
+            debug!("extract file");
             let mut file = file_raw?;
+            debug!("file_decode success for {:?}", file.path()?);
             for f_to_extract in &files {
-                if f_to_extract.installpath == match file.path()?.to_str() {
+                let path_str = "/".to_owned() + &match file.path()?.to_str() {
                     Some(f) => f,
                     None => return Err("Failed to convert string types".into())
-                }.to_string() {
+                };
+
+                if path_str == "/pkginfo" {
+                    debug!("p_extract_pathcheck skip package info");
+                }
+
+                debug!("{} {}", f_to_extract.installpath, path_str);
+
+                if f_to_extract.installpath == path_str {
+                    debug!("path match, begin routine f_extract_fullbom");
                     let mut data: Vec<u8> = vec![];
                     file.read_to_end(&mut data)?;
+                    debug!("data: {:?}", data);
                     fs::write(format!("{}{}", target, &f_to_extract.installpath), data)?;
                 }
             }
@@ -514,6 +531,9 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
     }
     if let Some(links) = pkginfo.pkgcontents.links {
         for link in links {
+            if Path::new(&link.target).exists() {
+                remove_file(&link.target)?;
+            }
             symlink(format!("{}{}", target, link.file), format!("{}{}", target, link.target))?;
         }
     }
