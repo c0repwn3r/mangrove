@@ -125,7 +125,7 @@ impl ExecutableCommand for InstallCommand {
         println!("Caluclating conflicts...");
         let pkgdb = pkgdb_load(self.local)?;
 
-        for (_, pkginfo) in &packages_to_install {
+        for (filename, pkginfo) in &packages_to_install {
             let conflicting = pkgdb.db.installed_packages.iter().find(|pkg| {
                 if let Some(conflicts) = &pkginfo.conflicts {
                     if conflicts.iter().any(|conflict| conflict.pkgname == pkg.pkgname && conflict.version.matches(&pkg.pkgver)) {
@@ -138,6 +138,17 @@ impl ExecutableCommand for InstallCommand {
                 false
             });
             if let Some(conflict) = conflicting {
+                if filename.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                    println!("Deleting temporary file {}...", filename);
+                    match fs::remove_file(filename) {
+                        Ok(_) => (),
+                        Err(e) => {
+                            err(format!("error removing temporary dir: {}", e));
+                            pkgdb_save(pkgdb, self.local)?;
+                            return Ok(())
+                        }
+                    }
+                }
                 err(format!("{} conflicts with {}, please resolve conflicts first", pkginfo.pkgname, conflict.pkgname));
                 return Ok(())
             }
@@ -145,10 +156,21 @@ impl ExecutableCommand for InstallCommand {
 
         println!("Resolving dependencies..");
         // TODO: real dependency resolution here, add missing packages
-        for (_, pkginfo) in &packages_to_install {
+        for (filename, pkginfo) in &packages_to_install {
             if let Some(dependencies) = &pkginfo.depends {
                 for dependency in dependencies {
                     if !&pkgdb.db.installed_packages.iter().any(|x| x.pkgname == dependency.pkgname && dependency.version.matches(&x.pkgver)) {
+                        if filename.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                            println!("Deleting temporary file {}...", filename);
+                            match fs::remove_file(filename) {
+                                Ok(_) => (),
+                                Err(e) => {
+                                    err(format!("error removing temporary dir: {}", e));
+                                    pkgdb_save(pkgdb, self.local)?;
+                                    return Ok(())
+                                }
+                            }
+                        }
                         err(format!("{} has required dependency {} that is not installed", pkginfo.pkgname, dependency.pkgname).into());
                         return Ok(())
                     }
