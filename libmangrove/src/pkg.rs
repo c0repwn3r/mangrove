@@ -528,11 +528,6 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
 pub fn install_pkg_to(package: &Vec<u8>, target: String, db: &mut PackageDb) -> Result<(), Box<dyn Error>> {
     let pkginfo = load_package(package)?;
 
-    // Sanity checking: there shouldn't be another package with this name
-    if let Some(_) = db.db.installed_packages.iter().find(|x| x.pkgname == pkginfo.pkgname) {
-        return Err(format!("{} is already installed", pkginfo.pkgname).into())
-    }
-
     for pkg in &db.db.installed_packages {
         // Conflict checking: another package lists this one as a conflict
         if let Some(conflicts) = &pkg.conflicts {

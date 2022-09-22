@@ -6,7 +6,7 @@ use std::path::{Path};
 use clap::{Parser, ArgAction};
 use human_bytes::human_bytes;
 use libmangrove::crypt::{decrypt_package, find_key, is_signed_package};
-use libmangrove::pkg::{get_pkg_filename, load_package, Package};
+use libmangrove::pkg::{get_pkg_filename, install_pkg_to, load_package, Package};
 use libmangrove::pkgdb::{pkgdb_load, pkgdb_save};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
 use crate::{err, ExecutableCommand};
@@ -143,7 +143,7 @@ impl ExecutableCommand for InstallCommand {
             }
         }
 
-        println!("Resolving dependencies..\n");
+        println!("Resolving dependencies..");
         // TODO: real dependency resolution here, add missing packages
         for (_, pkginfo) in &packages_to_install {
             if let Some(dependencies) = &pkginfo.depends {
@@ -154,7 +154,11 @@ impl ExecutableCommand for InstallCommand {
                     }
                 }
             }
+            if pkgdb.db.installed_packages.iter().any(|x| x.pkgname == pkginfo.pkgname && pkginfo.pkgver >= x.pkgver) {
+                warn(format!("{} is up to date - reinstalling", pkginfo.pkgname));
+            }
         }
+        println!();
 
         pkgdb_save(pkgdb, self.local)?;
 
@@ -162,7 +166,7 @@ impl ExecutableCommand for InstallCommand {
         println!("Number\tName\tVersion\tSize");
         let mut total_size = 0;
         let mut i = 1;
-        for (_, package) in packages_to_install {
+        for (_, package) in &packages_to_install {
             println!("{}\t{}\t{}\t{}", i, package.pkgname, package.pkgver, human_bytes(package.installed_size as f64));
             total_size += package.installed_size;
             i+=1;
@@ -180,6 +184,40 @@ impl ExecutableCommand for InstallCommand {
             return Ok(());
         }
         println!("Installing packages...");
+
+        let mut pkgdb = pkgdb_load(self.local)?;
+        for (file, pkg) in packages_to_install {
+            let data = match fs::read(file.clone()) {
+                Ok(d) => d,
+                Err(e) => {
+                    err(format!("failed to read package: {}", e));
+                    pkgdb_save(pkgdb, self.local)?;
+                    return Ok(())
+                }
+            };
+            println!("Installing {}-{}...", pkg.pkgname, pkg.pkgver);
+            match install_pkg_to(&data, (&self.target).clone(), &mut pkgdb) {
+                Ok(_) => (),
+                Err(e) => {
+                    err(format!("error installing package: {}", e));
+                    pkgdb_save(pkgdb, self.local)?;
+                    return Ok(())
+                }
+            }
+            if file.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                println!("Deleting temporary file {}...", file);
+                match fs::remove_file(file) {
+                    Ok(_) => (),
+                    Err(e) => {
+                        err(format!("error removing temporary dir: {}", e));
+                        pkgdb_save(pkgdb, self.local)?;
+                        return Ok(())
+                    }
+                }
+            }
+        }
+        pkgdb_save(pkgdb, self.local)?;
+
         Ok(())
     }
 }
