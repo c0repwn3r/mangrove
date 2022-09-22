@@ -22,8 +22,12 @@ lockfile = "0.4.0"
 base64 = "0.13.0"
 toml = "0.5.9"
 git-version = "0.3.5"
-serial_test = "0.9.0"
 url = { version = "2", features = ["serde"] }
+log = "0.4.17"
+
+[dev-dependencies]
+simple_logger = "2.3.0"
+serial_test = "0.9.0"
 
 [build-dependencies]
 build-data = "0.1.3"

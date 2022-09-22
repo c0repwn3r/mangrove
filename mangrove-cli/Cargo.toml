@@ -11,10 +11,9 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "3.2.20", features = ["derive", "cargo", "suggestions"] }
-clap_complete = "3.2.4"
-clap-nested = "0.4.0"
 libmangrove = { version = "0.2", path = "../libmangrove" }
 colored = "2.0.0"
 serde = { version = "1.0.144", features = ["derive"] }
 version = { version = "1.0.7", features = ["serde"], package="semver" }
 toml = "0.5.9"
+human_bytes = { version = "0.3", features = ["bibytes"] }

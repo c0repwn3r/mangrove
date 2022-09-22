@@ -1,4 +1,4 @@
-known_pubkeys = []
+known_pubkeys = ['LQaHiMmaBwE76yVoLubxtl5RKgG2blBrQkREWmtmgT8=']
 known_privkeys = []
 deny_pubkeys = []
 deny_privkeys = []

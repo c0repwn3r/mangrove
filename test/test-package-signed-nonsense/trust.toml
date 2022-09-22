@@ -1,0 +1,4 @@
+known_pubkeys = []
+known_privkeys = []
+deny_pubkeys = []
+deny_privkeys = []
