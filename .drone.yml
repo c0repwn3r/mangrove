@@ -21,3 +21,4 @@ steps:
     target: /ci/${DRONE_COMMIT}/
     path_style: true
     strip_prefix: "target/"
+    reigon: e3t-us-east1
