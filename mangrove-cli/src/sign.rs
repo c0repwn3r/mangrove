@@ -1,14 +1,13 @@
 use std::error::Error;
-use std::fs;
 use std::path::PathBuf;
 
 use clap::{ArgAction, Parser};
 
-use libmangrove::crypt::{encrypt_package, PrivateKey};
+use libmangrove::crypt::PrivateKey;
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
 
 use crate::{err, ExecutableCommand};
-use crate::util::info;
+use crate::util::{info, sign_pkg};
 
 #[derive(Parser)]
 #[clap(name = "sign", about = "Taking an unsigned package, sign it using the provided private key", version, author)]
@@ -70,10 +69,7 @@ impl ExecutableCommand for SignCommand {
         info("creating encrypted package file".into());
 
         if let Some(kd) = key {
-            let data = fs::read(&self.file)?;
-            let out_data = encrypt_package(&kd, &data)?;
-
-            fs::write(outfile, out_data)?;
+            sign_pkg(infile, outfile, &kd)?;
         } else {
             err("no keys available to sign".into());
         }

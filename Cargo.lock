@@ -608,11 +608,13 @@ dependencies = [
  "colored",
  "human_bytes",
  "libmangrove",
+ "rmp-serde",
  "semver",
  "serde",
  "simple_logger",
  "tabwriter",
  "toml",
+ "url",
 ]
 
 [[package]]

@@ -19,3 +19,5 @@ toml = "0.5.9"
 human_bytes = { version = "0.3", features = ["bibytes"] }
 tabwriter = "1.2.1"
 simple_logger = "2.3.0"
+rmp-serde = "1.1.0"
+url = "2.3.1"

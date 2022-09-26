@@ -28,7 +28,7 @@ use crate::pkgdb::PackageDb;
 // Package
 /// Responsible for representing all data about a package
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)] // Allow serde to do its magic
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)] // Allow serde to do its magic
 pub struct Package {
     /// The name of the package
     pub pkgname: String,                 // package name: String (required)
@@ -78,7 +78,7 @@ pub fn get_pkg_filename(package: &Package) -> String {
 // PkgSpec
 /// Represents a package specification (ie `test-package>=1`)
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[allow(clippy::module_name_repetitions)]
 pub struct PkgSpec {
     /// The name of the package
@@ -95,7 +95,7 @@ pub struct PkgSpec {
 /// - it cannot be guaranteed that the `files` for all of the `links` will exist if the `files` are extracted after the `links`
 /// Written differently: folders < files < links
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PackageContents {
     /// The folders present inside this package, if any
     pub folders: Option<Vec<PackageFolder>>,
@@ -108,7 +108,7 @@ pub struct PackageContents {
 // PackageFolder
 /// Represents a folder a package creates, and its metadata
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PackageFolder {
     /// The name of the folder inside the package file. Due to a design limitation, this must be the same as `installpath`
     pub name: String,
@@ -123,7 +123,7 @@ pub struct PackageFolder {
 // PackageFile
 /// Represents a file inside a package, and its metadata
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PackageFile {
     /// The name of the file inside the package file. Due to a design limitation, this must be the same as `installpath`
     pub name: String,
@@ -140,7 +140,7 @@ pub struct PackageFile {
 // PackageLink
 /// Represents a symbolic link that should be created by a package, and its metadata
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PackageLink {
     /// The source file for the symbolic link
     pub file: String,
@@ -153,7 +153,7 @@ pub struct PackageLink {
 // FileMetadata
 /// Represents metadata on a file or folder
 //
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct FileMetadata {
     /// The file owner's user ID.
     pub owner: usize,

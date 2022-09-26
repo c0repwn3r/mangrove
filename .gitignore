@@ -9,3 +9,7 @@ tarpaulin-report.html
 
 # Testing fakeroot
 test/fakeroot
+
+# Testing repository
+test/repo-test/repo
+test/repo-test/test
