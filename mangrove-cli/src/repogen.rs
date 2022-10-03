@@ -17,6 +17,7 @@ use crate::{err, ExecutableCommand, warn};
 use crate::util::info;
 
 #[derive(Parser)]
+#[clap(about = "Generate pool files for a package repository")]
 pub struct RepogenCommand {
     #[clap(name = "input", value_parser, help = "The folder to get unsigned package files from")]
     input: PathBuf,
