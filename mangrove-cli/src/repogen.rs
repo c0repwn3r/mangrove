@@ -25,6 +25,8 @@ pub struct RepogenCommand {
     output: PathBuf,
     #[clap(name = "baseurl", value_parser, help = "The world-accessible baseurl for this repository")]
     baseurl: Url,
+    #[clap(name = "dont_export_index", long = "dont_export_index", value_parser, action = ArgAction::SetTrue, default_value_t = false, help = "Disable exporting a index.json file for the repository browser")]
+    disable_export_index: bool,
     #[clap(name = "local", short = 'l', long = "local", value_parser, help = "Use a local trustcache", action = ArgAction::SetTrue, default_value_t = false)]
     local: bool,
     #[clap(name = "key", short = 'k', long = "key", value_parser, help  = "Which private key to use. This may also be a prefix of a key, to use a key from a trustcache. If not provided, will use the first key found in the trustcache.")]
@@ -137,6 +139,13 @@ impl ExecutableCommand for RepogenCommand {
 
             info("writing repodata".into());
             fs::write(self.output.join("repodata"), rmp_serde::to_vec(&repo)?)?;
+
+            if self.disable_export_index {
+                info("skipping index.json".into());
+            } else {
+                info("exporting index.json".into());
+                fs::write(self.output.join("index.json"), serde_json::to_string(&repo)?)?;
+            }
         } else {
             err("no keys avaliable to sign".into());
         }
