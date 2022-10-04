@@ -22,7 +22,7 @@ pub struct InstallCommand {
     #[clap(name = "sync", short = 'S', long = "--sync", help = "Sync remote repositories to get an updated list of avaliable packages", action = ArgAction::SetTrue, default_value_t = false)]
     pub sync: bool,
 
-    #[clap(name = "target", short = 'T', long = "--target", help = "Installation target rootfs. Defaults to /, mostly for testing", default_value_t = String::from("/"))]
+    #[clap(name = "target", short = 'T', long = "--target", help = "Installation target rootfs. Defaults to /. This directory must exist already to prevent issues on some older obscure filesystems", default_value_t = String::from("/"))]
     pub target: String,
 
     #[clap(name = "local", short = 'l', long = "--local", help = "Use a local database file", action = ArgAction::SetTrue, default_value_t = false)]
