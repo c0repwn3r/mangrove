@@ -19,7 +19,7 @@ pub struct InstallCommand {
     #[clap(name = "package", help = "Specify a repository package or file to install")]
     pub packages: Vec<String>,
 
-    #[clap(name = "sync", help = "Sync remote repositories to get an updated list of avaliable packages", action = ArgAction::SetTrue, default_value_t = false)]
+    #[clap(name = "sync", short = 'S', long = "--sync", help = "Sync remote repositories to get an updated list of avaliable packages", action = ArgAction::SetTrue, default_value_t = false)]
     pub sync: bool,
 
     #[clap(name = "target", short = 'T', long = "--target", help = "Installation target rootfs. Defaults to /, mostly for testing", default_value_t = String::from("/"))]
@@ -47,6 +47,16 @@ impl ExecutableCommand for InstallCommand {
                 files_to_install.push(package.clone());
             } else {
                 warn(format!("installing from repositories is currently not implemented, skipping {}", package));
+                print!("One or more packages could not be resolved. Continue? [Y/n] ");
+                let _=stdout().flush();
+
+                let mut c: [u8; 1] = [0];
+                stdin().read_exact(&mut c)?;
+                let c = c[0] as char;
+                if c == 'n' || c == 'N' {
+                    println!("Aborted by user");
+                    return Ok(());
+                }
                 continue;
             }
         }
@@ -63,6 +73,16 @@ impl ExecutableCommand for InstallCommand {
                 Ok(d) => d,
                 Err(e) => {
                     warn(format!("an error occured reading {} ({}), it will be skipped", file, e).into());
+                    print!("One or more packages could not be read. Continue? [Y/n] ");
+                    let _=stdout().flush();
+
+                    let mut c: [u8; 1] = [0];
+                    stdin().read_exact(&mut c)?;
+                    let c = c[0] as char;
+                    if c == 'n' || c == 'N' {
+                        println!("Aborted by user");
+                        return Ok(());
+                    }
                     continue;
                 }
             };
@@ -74,6 +94,16 @@ impl ExecutableCommand for InstallCommand {
                     Ok(p) => p,
                     Err(e) => {
                         err(format!("error loading package: {}, it will be skipped", e).into());
+                        print!("One or more packages could not be loaded. Continue? [Y/n] ");
+                        let _=stdout().flush();
+
+                        let mut c: [u8; 1] = [0];
+                        stdin().read_exact(&mut c)?;
+                        let c = c[0] as char;
+                        if c == 'n' || c == 'N' {
+                            println!("Aborted by user");
+                            return Ok(());
+                        }
                         continue;
                     }
                 };
@@ -89,6 +119,16 @@ impl ExecutableCommand for InstallCommand {
                     Ok(d) => d,
                     Err(e) => {
                         warn(format!("an error occured decrypting {} ({}), it will be skipped", file, e).into());
+                        print!("One or more packages could not be loaded. Continue? [Y/n] ");
+                        let _=stdout().flush();
+
+                        let mut c: [u8; 1] = [0];
+                        stdin().read_exact(&mut c)?;
+                        let c = c[0] as char;
+                        if c == 'n' || c == 'N' {
+                            println!("Aborted by user");
+                            return Ok(());
+                        }
                         continue;
                     }
                 };
@@ -101,6 +141,16 @@ impl ExecutableCommand for InstallCommand {
                         Ok(d) => d,
                         Err(e) => {
                             err(format!("failed to decrypt {} ({}), it will be skipped", &file, e).into());
+                            print!("One or more packages could not be decrypted. Continue? [Y/n] ");
+                            let _=stdout().flush();
+
+                            let mut c: [u8; 1] = [0];
+                            stdin().read_exact(&mut c)?;
+                            let c = c[0] as char;
+                            if c == 'n' || c == 'N' {
+                                println!("Aborted by user");
+                                return Ok(());
+                            }
                             continue;
                         }
                     };
@@ -108,6 +158,16 @@ impl ExecutableCommand for InstallCommand {
                         Ok(d) => d,
                         Err(e) => {
                             err(format!("failed to load decrypted {} ({}), it will be skipped", &file, e).into());
+                            print!("One or more packages could not be loaded after decryption. Continue? [Y/n] ");
+                            let _=stdout().flush();
+
+                            let mut c: [u8; 1] = [0];
+                            stdin().read_exact(&mut c)?;
+                            let c = c[0] as char;
+                            if c == 'n' || c == 'N' {
+                                println!("Aborted by user");
+                                return Ok(());
+                            }
                             continue;
                         }
                     };
@@ -115,12 +175,32 @@ impl ExecutableCommand for InstallCommand {
                         Ok(_) => (),
                         Err(e) => {
                             err(format!("failed to write to temporary file {} ({}), {} will be skipped", format!("DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), e, &file).into());
+                            print!("One or more packages could not be decrypted. Continue? [Y/n] ");
+                            let _=stdout().flush();
+
+                            let mut c: [u8; 1] = [0];
+                            stdin().read_exact(&mut c)?;
+                            let c = c[0] as char;
+                            if c == 'n' || c == 'N' {
+                                println!("Aborted by user");
+                                return Ok(());
+                            }
                             continue;
                         }
                     };
                     packages_to_install.insert(format!("DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), pkg);
                 } else {
                     warn(format!("no key avaliable to decrypt {}, it will be skipped", &file).into());
+                    print!("One or more packages could not be decrypted. Continue? [Y/n] ");
+                    let _=stdout().flush();
+
+                    let mut c: [u8; 1] = [0];
+                    stdin().read_exact(&mut c)?;
+                    let c = c[0] as char;
+                    if c == 'n' || c == 'N' {
+                        println!("Aborted by user");
+                        return Ok(());
+                    }
                 }
             }
             trustcache_save(trustcache, self.local)?;
