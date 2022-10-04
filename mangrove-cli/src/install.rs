@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+use std::fs::create_dir_all;
 use std::io::{Read, stdin, stdout, Write};
 use std::path::{Path};
 use clap::{Parser, ArgAction};
@@ -171,10 +172,11 @@ impl ExecutableCommand for InstallCommand {
                             continue;
                         }
                     };
-                    match fs::write(format!("DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), data_dec) {
+                    create_dir_all("/tmp/mgve")?;
+                    match fs::write(format!("/tmp/mgve/DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), data_dec) {
                         Ok(_) => (),
                         Err(e) => {
-                            err(format!("failed to write to temporary file {} ({}), {} will be skipped", format!("DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), e, &file).into());
+                            err(format!("failed to write to temporary file {} ({}), {} will be skipped", format!("/tmp/mgve/DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), e, &file).into());
                             print!("One or more packages could not be decrypted. Continue? [Y/n] ");
                             let _=stdout().flush();
 
@@ -188,7 +190,7 @@ impl ExecutableCommand for InstallCommand {
                             continue;
                         }
                     };
-                    packages_to_install.insert(format!("DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), pkg);
+                    packages_to_install.insert(format!("/tmp/mgve/DECRYPTED_TMP_PACKAGE_MM_pkg{}.mgve", get_pkg_filename(&pkg)), pkg);
                 } else {
                     warn(format!("no key avaliable to decrypt {}, it will be skipped", &file).into());
                     print!("One or more packages could not be decrypted. Continue? [Y/n] ");
@@ -222,7 +224,7 @@ impl ExecutableCommand for InstallCommand {
                 false
             });
             if let Some(conflict) = conflicting {
-                if filename.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                if filename.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
                     println!("Deleting temporary file {}...", filename);
                     match fs::remove_file(filename) {
                         Ok(_) => (),
@@ -250,7 +252,7 @@ impl ExecutableCommand for InstallCommand {
                             if !package_installation_queue.contains(&other_pkg.0.clone()) { package_installation_queue.push(other_pkg.0.clone()); }
                             continue;
                         }
-                        if filename.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                        if filename.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
                             println!("Deleting temporary file {}...", filename);
                             match fs::remove_file(filename) {
                                 Ok(_) => (),
@@ -321,6 +323,17 @@ impl ExecutableCommand for InstallCommand {
                 Err(e) => {
                     err(format!("failed to read package: {}", e));
                     pkgdb_save(pkgdb, self.local)?;
+                    if file.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                        println!("Deleting temporary file {}...", filename);
+                        match fs::remove_file(filename) {
+                            Ok(_) => (),
+                            Err(e) => {
+                                err(format!("error removing temporary dir: {}", e));
+                                pkgdb_save(pkgdb, self.local)?;
+                                return Ok(())
+                            }
+                        }
+                    }
                     return Ok(())
                 }
             };
@@ -330,10 +343,21 @@ impl ExecutableCommand for InstallCommand {
                 Err(e) => {
                     err(format!("error installing package: {}", e));
                     pkgdb_save(pkgdb, self.local)?;
+                    if file.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+                        println!("Deleting temporary file {}...", filename);
+                        match fs::remove_file(filename) {
+                            Ok(_) => (),
+                            Err(e) => {
+                                err(format!("error removing temporary dir: {}", e));
+                                pkgdb_save(pkgdb, self.local)?;
+                                return Ok(())
+                            }
+                        }
+                    }
                     return Ok(())
                 }
             }
-            if file.starts_with("DECRYPTED_TMP_PACKAGE_MM_pkg") {
+            if file.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
                 println!("Deleting temporary file {}...", file);
                 match fs::remove_file(file) {
                     Ok(_) => (),
