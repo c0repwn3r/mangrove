@@ -322,10 +322,9 @@ impl ExecutableCommand for InstallCommand {
                 Ok(d) => d,
                 Err(e) => {
                     err(format!("failed to read package: {}", e));
-                    pkgdb_save(pkgdb, self.local)?;
                     if file.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
-                        println!("Deleting temporary file {}...", filename);
-                        match fs::remove_file(filename) {
+                        println!("Deleting temporary file {}...", file);
+                        match fs::remove_file(file) {
                             Ok(_) => (),
                             Err(e) => {
                                 err(format!("error removing temporary dir: {}", e));
@@ -334,6 +333,7 @@ impl ExecutableCommand for InstallCommand {
                             }
                         }
                     }
+                    pkgdb_save(pkgdb, self.local)?;
                     return Ok(())
                 }
             };
@@ -342,10 +342,9 @@ impl ExecutableCommand for InstallCommand {
                 Ok(_) => (),
                 Err(e) => {
                     err(format!("error installing package: {}", e));
-                    pkgdb_save(pkgdb, self.local)?;
                     if file.contains("DECRYPTED_TMP_PACKAGE_MM_pkg") {
-                        println!("Deleting temporary file {}...", filename);
-                        match fs::remove_file(filename) {
+                        println!("Deleting temporary file {}...", file);
+                        match fs::remove_file(file) {
                             Ok(_) => (),
                             Err(e) => {
                                 err(format!("error removing temporary dir: {}", e));
@@ -354,6 +353,7 @@ impl ExecutableCommand for InstallCommand {
                             }
                         }
                     }
+                    pkgdb_save(pkgdb, self.local)?;
                     return Ok(())
                 }
             }
