@@ -35,7 +35,7 @@ pub fn mcrypt_sha256_file(filename: &String) -> Result<String, Box<dyn Error>> {
         Ok(_) => (),
         Err(err) => return Err(format!("Unable to copy file data: {}", err).into()),
     }
-    // IntelliJ platform users: Ignore the warning here. This is a bug in the IntelliJ Rust plugin.
+    // IntelliJ platform users: Ignore the error here. Box<[u8]> does implement LowerHex. No idea what it's on about.
     Ok(format!("{:x}", hasher.finalize()))
 }
 
@@ -91,17 +91,17 @@ impl PrivateKey {
     /// let private_key = PrivateKey::generate(String::from("test_key"));
     /// ```
     //
-    pub fn generate(name: String) -> PrivateKey {
+    pub fn generate(name: String) -> Self {
         let mut rng = OsRng {};
         let keypair = Keypair::generate(&mut rng);
-        PrivateKey {
+        Self {
             name,
             key_data: keypair,
         }
     }
 
     // derive
-    /// Derive a PublicKey from this PrivateKey
+    /// Derive a `PublicKey` from this `PrivateKey`
     /// ```
     /// use libmangrove::crypt::PrivateKey;
     /// let private_key = PrivateKey::generate(String::from("test_key"));
@@ -116,44 +116,44 @@ impl PrivateKey {
     }
 
     // to_anonymous
-    /// Serialize this PrivateKey into a base64-encoded anonymous private key.
+    /// Serialize this `PrivateKey` into a base64-encoded anonymous private key.
     pub fn to_anonymous(&self) -> String {
         base64::encode(&self.key_data.to_bytes())
     }
 
     // from_anonymous
-    /// Attempt to create a new PrivateKey from an anonymous base64-encoded private key.
+    /// Attempt to create a new `PrivateKey` from an anonymous base64-encoded private key.
     /// # Errors
     /// This function may error if:
-    /// - an error occured trying to convert "__anonymous__" to a String
-    /// - an error occured while decoding the base64 key
-    /// - an error occured while loading the base64 key into a Keypair
+    /// - an error occurred trying to convert "__anonymous__" to a String
+    /// - an error occurred while decoding the base64 key
+    /// - an error occurred while loading the base64 key into a Keypair
     pub fn from_anonymous(anonymous: &String) -> Result<Self, Box<dyn Error>> {
-        Ok(PrivateKey {
+        Ok(Self {
             name: "__anonymous__".parse()?,
-            key_data: Keypair::from_bytes(&*base64::decode(anonymous)?)?
+            key_data: Keypair::from_bytes(&base64::decode(anonymous)?)?
         })
     }
 }
 
 impl PublicKey {
     // to_anonymous
-    /// Serialize this PublicKey into a base64-encoded anonymous public key.
+    /// Serialize this `PublicKey` into a base64-encoded anonymous public key.
     pub fn to_anonymous(&self) -> String {
         base64::encode(&self.key_data.to_bytes())
     }
 
     // from_anonymous
-    /// Attempt to create a new PublicKey from an anonymous base64-encoded public key.
+    /// Attempt to create a new `PublicKey` from an anonymous base64-encoded public key.
     /// # Errors
     /// This function may error if:
-    /// - an error occured trying to convert "__anonymous__" to a String
-    /// - an error occured while decoding the base64 key
-    /// - an error occured while loading the base64 key into a VerifyingKey
+    /// - an error occurred trying to convert "__anonymous__" to a String
+    /// - an error occurred while decoding the base64 key
+    /// - an error occurred while loading the base64 key into a `VerifyingKey`
     pub fn from_anonymous(anonymous: &String) -> Result<Self, Box<dyn Error>> {
-        Ok(PublicKey {
+        Ok(Self {
             name: "__anonymous__".parse()?,
-            key_data: VerifyingKey::from_bytes(&*base64::decode(anonymous)?)?
+            key_data: VerifyingKey::from_bytes(&base64::decode(anonymous)?)?
         })
     }
 }
@@ -175,7 +175,7 @@ pub fn mcrypt_sha256_raw(data: &[u8]) -> Vec<u8> {
 }
 
 // encrypt_package
-/// Given a PrivateKey and any arbitrary data array, encrypt it using the Signed Package format and return the result as a byte array
+/// Given a `PrivateKey` and any arbitrary data array, encrypt it using the Signed Package format and return the result as a byte array
 /// ```
 /// use libmangrove::crypt::{encrypt_package, PrivateKey};
 /// let private_key = PrivateKey::generate(String::from("test_key"));
@@ -287,7 +287,7 @@ pub fn decrypt_package(vkey: &PublicKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn
 /// Dump the provided encrypted data in the Signed Package Format to a string.
 /// Optionally, decrypt the data if the correct public key is provided.
 //
-pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
+pub fn debug_dump_package(data: &[u8], vkey: Option<&PublicKey>) -> String {
     let mut result = String::from("== Begin Package Dump ==\n");
     // Check for the magic
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
@@ -369,7 +369,7 @@ pub fn debug_dump_package(data: Vec<u8>, vkey: Option<&PublicKey>) -> String {
 /// Determine if the provided data array has the correct structure of a package in the Signed Package Format.
 /// Does not perform signature checks.
 //
-pub fn is_signed_package(data: Vec<u8>) -> bool {
+pub fn is_signed_package(data: &[u8]) -> bool {
     // Check for the magic
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
         return false;

@@ -338,7 +338,7 @@ mod libmangrove_pkg_tests {
         };
         let fname = format!("../test/test-package/{}", get_pkg_filename(&get_test_package()));
         let signed_package_data = fs::read(fname).unwrap();
-        assert!(is_signed_package(signed_package_data));
+        assert!(is_signed_package(&signed_package_data));
     }
 
     #[test]
@@ -460,7 +460,7 @@ mod libmangrove_pkg_tests {
         let fname = format!("{}/../test/test-package-signed-nonsense/{}", env::current_dir().unwrap().to_str().unwrap(), get_pkg_filename(&get_test_nonsense_package()));
         println!("{}", fname);
         let signed_package_data = fs::read(fname).unwrap();
-        assert!(is_signed_package(signed_package_data));
+        assert!(is_signed_package(&signed_package_data));
     }
 
     #[test]
@@ -674,8 +674,8 @@ mod libmangrove_mcrypt_tests {
             Ok(e) => e,
             Err(err) => panic!("{}", err)
         };
-        println!("{}", debug_dump_package(encrypted.clone(), Some(&pk)));
-        println!("{}", debug_dump_package(encrypted.clone(), None));
+        println!("{}", debug_dump_package(&encrypted, Some(&pk)));
+        println!("{}", debug_dump_package(&encrypted, None));
     }
 
     #[test]

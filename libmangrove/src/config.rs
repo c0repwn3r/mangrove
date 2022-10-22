@@ -24,21 +24,21 @@ pub fn create_config_structure(local: bool) -> Result<(), Box<dyn Error>> {
 // get_trustcache_file
 /// This function is used to determine what file the trustcache should be stored in, depending if it is `local` or not.
 /// If `local` is true, this will return "./trust.toml", otherwise "/etc/mangrove/trust.toml". Subject to change.
-pub fn get_trustcache_file(local: bool) -> String {
+pub const fn get_trustcache_file(local: bool) -> &'static str {
     if local {
-        "./trust.toml".to_string()
+        "./trust.toml"
     } else {
-        "/etc/mangrove/trust.toml".to_string()
+        "/etc/mangrove/trust.toml"
     }
 }
 
 // get_pkgdb_file
 /// This function is used to determine what file the pkgdb should be stored in, depending if it is `local` or not.
 /// If `local` is true, this will return "./db", otherwise "/etc/mangrove/db". Subject to change.
-pub fn get_pkgdb_file(local: bool) -> String {
+pub const fn get_pkgdb_file(local: bool) -> &'static str {
     if local {
-        "./db".to_string()
+        "./db"
     } else {
-        "/etc/mangrove/db".to_string()
+        "/etc/mangrove/db"
     }
 }
