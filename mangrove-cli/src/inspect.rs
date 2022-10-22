@@ -26,7 +26,7 @@ pub struct InspectCommand {
 impl ExecutableCommand for InspectCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         let args = self;
-        let data: Vec<u8> = match fs::read(args.file.as_path()) {
+        let mut data: Vec<u8> = match fs::read(args.file.as_path()) {
             Ok(d) => d,
             Err(e) => {
                 println!("Error while opening package: {}", e);
@@ -43,11 +43,10 @@ impl ExecutableCommand for InspectCommand {
                 }
             };
         }
-        let mut package_data = data.clone();
-        if is_signed_package(data.clone()) {
+        if is_signed_package(&data) {
             println!("Package Type: Signed");
             println!("Signed Package Format Dump");
-            println!("{}", debug_dump_package(data.clone(), key.as_ref()));
+            println!("{}", debug_dump_package(&data, key.as_ref()));
             let mut foundkey = key;
             if foundkey.is_none() {
                 println!("no key provided, trying trustcache");
@@ -78,7 +77,7 @@ impl ExecutableCommand for InspectCommand {
             println!("Decrypting package...");
             match decrypt_package(foundkey.as_ref().unwrap(), &data[..]) {
                 Ok(d) => {
-                    package_data = d;
+                    data = d;
                 },
                 Err(e) => {
                     println!("err: failed to decrypt package ({})", e);
@@ -88,7 +87,7 @@ impl ExecutableCommand for InspectCommand {
         } else {
             println!("Package Type: Unsigned");
         }
-        dump_package(&match load_package(&package_data) {
+        dump_package(&match load_package(&data) {
             Ok(p) => p,
             Err(e) => {
                 println!("err: failed to load package: {}", e);

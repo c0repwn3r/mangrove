@@ -3,14 +3,17 @@ use std::error::Error;
 use std::fs;
 use std::fs::create_dir_all;
 use std::io::{Read, stdin, stdout, Write};
-use std::path::{Path};
-use clap::{Parser, ArgAction};
+use std::path::Path;
+
+use clap::{ArgAction, Parser};
 use human_bytes::human_bytes;
 use tabwriter::TabWriter;
+
 use libmangrove::crypt::{decrypt_package, find_key, is_signed_package};
 use libmangrove::pkg::{get_pkg_filename, install_pkg_to, load_package, Package};
 use libmangrove::pkgdb::{pkgdb_load, pkgdb_save};
 use libmangrove::trustcache::{trustcache_load, trustcache_save};
+
 use crate::{err, ExecutableCommand};
 use crate::util::{info, warn};
 
@@ -87,7 +90,7 @@ impl ExecutableCommand for InstallCommand {
                     continue;
                 }
             };
-            if is_signed_package(data.clone()) {
+            if is_signed_package(&data) {
                 needs_trustcache = true;
                 packages_need_decryption.push(file);
             } else {
@@ -133,7 +136,7 @@ impl ExecutableCommand for InstallCommand {
                         continue;
                     }
                 };
-                if !is_signed_package(data.clone()) { continue; }
+                if !is_signed_package(&data) { continue; }
 
                 let key = find_key(&data[..], &trustcache);
 

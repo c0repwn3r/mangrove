@@ -104,7 +104,7 @@ impl ExecutableCommand for RepogenCommand {
 
             for f in files_to_include {
                 let data = fs::read(f.clone())?;
-                if is_signed_package(data.clone()) {
+                if is_signed_package(&data) {
                     warn(format!("skipping already-signed package {}", f.display()));
                     continue;
                 }
