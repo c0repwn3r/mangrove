@@ -613,7 +613,7 @@ mod libmangrove_mcrypt_tests {
     use serial_test::serial;
 
     use crate::aes::{AES128Cipher, AES192Cipher, AES256Cipher};
-    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, PrivateKey};
+    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, mcrypt_sha256_file, mcrypt_sha256_verify_file, PrivateKey};
     use crate::test::libmangrove_tests_common::{get_test_package_bytes, get_test_privkey, get_test_pubkey};
     use crate::trustcache::{allow_pk, allow_sk, clear_pk, clear_sk, trustcache_load, trustcache_save};
 
@@ -698,7 +698,7 @@ mod libmangrove_mcrypt_tests {
         let mut trustcache = trustcache_load(true).unwrap();
         let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
         allow_pk(&mut trustcache, &get_test_pubkey()).unwrap();
-        let _ = find_key(&data[..], &trustcache).unwrap();
+        let _foundkey = find_key(&data[..], &trustcache).unwrap();
         clear_pk(&mut trustcache, &get_test_pubkey()).unwrap();
         trustcache_save(trustcache, true).unwrap();
     }
@@ -709,9 +709,80 @@ mod libmangrove_mcrypt_tests {
         let mut trustcache = trustcache_load(true).unwrap();
         let data = encrypt_package(&get_test_privkey(), &get_test_package_bytes()[..]).unwrap();
         allow_sk(&mut trustcache, &get_test_privkey()).unwrap();
-        let _ = find_key(&data[..], &trustcache).unwrap();
+        let _foundkey = find_key(&data[..], &trustcache).unwrap();
         clear_sk(&mut trustcache, &get_test_privkey()).unwrap();
         trustcache_save(trustcache, true).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_sha256_file_cant_open() {
+        mcrypt_sha256_file(&String::from("/root/some/file/that_def/doesnt-exist/and-that-we-cant/read")).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_sha256_verify_file_cant_open() {
+        mcrypt_sha256_verify_file(
+            &String::from("/root/some/other/file/that_def/totally-doesnt-exist/and_we_cant/read-it/anyways"),
+            &String::from("NONSENSE!")).unwrap();
+    }
+
+    #[test]
+    fn mcrypt_sha256_verify_file_doesnt_match() {
+        // The purpose of this first assert!() is to guarantee that the below failure case is because of a hash mismatch, allowing us to test that execution path
+        mcrypt_sha256_file(&String::from("/etc/passwd")).unwrap();
+        assert!(mcrypt_sha256_verify_file(
+            &String::from("/etc/passwd"),
+            &String::from("NONSENSE!")).is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    #[cfg(feature = "enable_huge_tests")]
+    fn mcrypt_encrypt_package_too_big() {
+        let massive_data_package = vec![0u8; 4_294_967_296].into_boxed_slice();
+        encrypt_package(&get_test_privkey(), &massive_data_package).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_dump_package_not_an_encrypted_package() {
+        let not_a_real_package = [0x41, 0x00, 0x00, 0x00u8, 0x00];
+        decrypt_package(&get_test_pubkey(), &not_a_real_package).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_decrypt_package_sd_sentinel_missing() {
+        let package_with_a_magic_but_no_sentinel = [0x4d, 0x47, 0x56, 0x45u8, 0x51];
+        decrypt_package(&get_test_pubkey(), &package_with_a_magic_but_no_sentinel).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_decrypt_package_end_sentinel_missing() {
+        let package_with_a_magic_but_no_sentinel = [0x4d, 0x47, 0x56, 0x45u8, 0x00, 0x42u8];
+        decrypt_package(&get_test_pubkey(), &package_with_a_magic_but_no_sentinel).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn mcrypt_decrypt_package_not_an_encrypted_package() {
+        let not_a_real_package = [0x41, 0x00, 0x00, 0x00u8, 0x00];
+        decrypt_package(&get_test_pubkey(), &not_a_real_package).unwrap();
+    }
+
+    #[test]
+    fn mcrypt_dump_package_sd_sentinel_missing() {
+        let package_with_a_magic_but_no_sentinel = [0x4d, 0x47, 0x56, 0x45u8, 0x51];
+        debug_dump_package(&package_with_a_magic_but_no_sentinel, Some(&get_test_pubkey()));
+    }
+
+    #[test]
+    fn mcrypt_dump_package_end_sentinel_missing() {
+        let package_with_a_magic_but_no_sentinel = [0x4d, 0x47, 0x56, 0x45u8, 0x00, 0x42u8];
+        debug_dump_package(&package_with_a_magic_but_no_sentinel, Some(&get_test_pubkey()));
     }
 }
 

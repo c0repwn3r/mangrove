@@ -198,6 +198,8 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn
     // p_val  0x42          End sentinel
     let signature: Signature = key.key_data.sign(data);
     if key.key_data.verify(data, &signature).is_err() {
+        // This line is impossible to test because I don't think it's even possible to reach this code without having some form of unwanted code injection from outside
+        // For now, it will remain untested. If anyone has an idea for how to write a test for this case, lmk
         return Err("Signature failed basic sanity checks".into())
     }
     let mut signature_b = signature.to_bytes().to_vec();
@@ -246,6 +248,9 @@ pub fn encrypt_package(key: &PrivateKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn
 //
 pub fn decrypt_package(vkey: &PublicKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     // Check for the magic
+    if data.len() < 71 {
+        return Err("Provided data too small to be an actual package (minimum 71 bytes)".into());
+    }
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
         return Err("Not an encrypted package (magic missing)".into());
     }
@@ -290,6 +295,11 @@ pub fn decrypt_package(vkey: &PublicKey, data: &[u8]) -> Result<Vec<u8>, Box<dyn
 pub fn debug_dump_package(data: &[u8], vkey: Option<&PublicKey>) -> String {
     let mut result = String::from("== Begin Package Dump ==\n");
     // Check for the magic
+    if data.len() < 71 {
+        result += "| Provided data too small to be an actual package (minimum 71 bytes)\n";
+        result += "== End Package Dump ==";
+        return result;
+    }
     if data[0] != 0x4d || data[1] != 0x47 || data[2] != 0x56 || data[3] != 0x45 {
         result += "| Magic: Not Present\n";
         result += "| Package State: INVALID\n";
