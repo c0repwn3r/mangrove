@@ -867,3 +867,33 @@ mod libmangrove_database_tests {
         pkgdb_save(pkgdb, true).unwrap();
     }
 }
+
+#[cfg(test)]
+mod libmangrove_misc_tests {
+    use crate::{detailed_version, gitbranch, gitver, pkgver, version};
+
+    #[test]
+    fn misc_pkgver() {
+        pkgver();
+    }
+
+    #[test]
+    fn misc_gitver() {
+        gitver();
+    }
+
+    #[test]
+    fn misc_version() {
+        version();
+    }
+
+    #[test]
+    fn misc_detailed_version() {
+        detailed_version();
+    }
+
+    #[test]
+    fn misc_gitbranch() {
+        gitbranch();
+    }
+}
