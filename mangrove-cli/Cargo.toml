@@ -22,3 +22,4 @@ simple_logger = "2.3.0"
 rmp-serde = "1.1.0"
 url = "2.3.1"
 serde_json = "1.0.85"
+inquire = { version = "0.4.0", features = ["editor"] }

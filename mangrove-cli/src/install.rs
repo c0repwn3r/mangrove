@@ -32,9 +32,17 @@ pub struct InstallCommand {
 
 impl ExecutableCommand for InstallCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
-        if self.packages.len() == 0 {
+        if self.packages.len() == 0 && !self.sync {
             err("no targets specified".into());
             return Ok(());
+        }
+
+        if self.sync {
+            // DO SYNC
+            println!("Syncing configured repositories...");
+            if self.packages.len() == 0 {
+                return Ok(());
+            }
         }
 
         info("loading packages...".into());
