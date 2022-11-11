@@ -259,7 +259,7 @@ mod libmangrove_pkg_tests {
 
     use crate::crypt::is_signed_package;
     use crate::file::FileOps;
-    use crate::pkg::{extract_pkg_to, get_pkg_filename, install_pkg_to, Package, PackageContents, PkgSpec, save_package, save_package_signed};
+    use crate::pkg::{dump_package, extract_pkg_to, get_pkg_filename, install_pkg_to, Package, PackageContents, PkgSpec, save_package, save_package_signed};
     use crate::pkgdb::{pkgdb_load, pkgdb_save};
     use crate::platform::Architecture;
     use crate::test::libmangrove_tests_common::{get_test_nonsense_package, get_test_nonsense_package_bytes, get_test_package, get_test_package_bytes, get_test_privkey};
@@ -594,6 +594,11 @@ mod libmangrove_pkg_tests {
 
         res.unwrap();
     }
+
+    #[test]
+    fn dump_pkg() {
+        dump_package(&get_test_package());
+    }
 }
 
 #[cfg(test)]
@@ -613,7 +618,7 @@ mod libmangrove_mcrypt_tests {
     use serial_test::serial;
 
     use crate::aes::{AES128Cipher, AES192Cipher, AES256Cipher};
-    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, mcrypt_sha256_file, mcrypt_sha256_verify_file, PrivateKey};
+    use crate::crypt::{debug_dump_package, decrypt_package, encrypt_package, find_key, is_signed_package, mcrypt_sha256_file, mcrypt_sha256_verify_file, PrivateKey};
     use crate::test::libmangrove_tests_common::{get_test_package_bytes, get_test_privkey, get_test_pubkey};
     use crate::trustcache::{allow_pk, allow_sk, clear_pk, clear_sk, trustcache_load, trustcache_save};
 
@@ -784,6 +789,19 @@ mod libmangrove_mcrypt_tests {
         let package_with_a_magic_but_no_sentinel = [0x4d, 0x47, 0x56, 0x45u8, 0x00, 0x42u8];
         debug_dump_package(&package_with_a_magic_but_no_sentinel, Some(&get_test_pubkey()));
     }
+
+    #[test]
+    fn mcrypt_is_signed_package_no_magic() {
+        assert!(!is_signed_package(&[0x00, 0x00, 0x00, 0x00]));
+    }
+    #[test]
+    fn mcrypt_is_signed_package_missing_sentinel() {
+        assert!(!is_signed_package(&[0x4d,0x47,0x56,0x45, 0x00, 0x5]));
+    }
+    #[test]
+    fn mcrypt_is_signed_package_missing_end() {
+        assert!(!is_signed_package(&[0x4d,0x47,0x56,0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
+    }
 }
 
 #[cfg(test)]
@@ -871,6 +889,7 @@ mod libmangrove_database_tests {
 #[cfg(test)]
 mod libmangrove_misc_tests {
     use crate::{detailed_version, gitbranch, gitver, pkgver, version};
+    use crate::file::set_cwd;
 
     #[test]
     fn misc_pkgver() {
@@ -895,5 +914,11 @@ mod libmangrove_misc_tests {
     #[test]
     fn misc_gitbranch() {
         gitbranch();
+    }
+
+    #[test]
+    #[should_panic]
+    fn set_cwd_noperm() {
+        set_cwd("/root/definitely/cant/cd/here").unwrap();
     }
 }

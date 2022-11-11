@@ -32,13 +32,13 @@ pub struct ConfiguredRepository {
 /// The core of the trustcache, contains a list of trusted public keys and private keys
 /// All `PrivateKeys` will also have their associated `PublicKey` inferred.
 /// The operation for checking a key goes in this order:
-/// 1. check if it is in deny_privkeys (public or private)
+/// 1. check if it is in `deny_privkeys` (public or private)
 /// -> if so: error
-/// 2. check if it is in deny_pubkeys
+/// 2. check if it is in `deny_pubkeys`
 /// -> if so: error
-/// 3. check if it is in known_privkeys (public or private)
+/// 3. check if it is in `known_privkeys` (public or private)
 /// -> if so: stop, success
-/// 4. check if it is in known_pubkeys
+/// 4. check if it is in `known_pubkeys`
 /// -> if so: stop, success
 /// 5. error, key not known
 //

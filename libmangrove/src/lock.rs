@@ -14,6 +14,11 @@ Package operations    - /etc/mangrove/locks/package.lock
 */
 
 /// Attempt to get a lock on the repository datastructures
+/// # Errors
+/// This function will error if:
+/// - the locks directory could not be created
+/// - the lock could not be created
+#[allow(clippy::module_name_repetitions)]
 pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
     match create_config_structure(use_local_lockfile) {
         Ok(_) => (),
@@ -30,6 +35,11 @@ pub fn lock_repository(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Err
     Ok(lock)
 }
 /// Attempt to get a lock on the trustcache
+/// # Errors
+/// This function will error if:
+/// - the locks directory could not be created
+/// - the lock could not be created
+#[allow(clippy::module_name_repetitions)]
 pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
     match create_config_structure(use_local_lockfile) {
         Ok(_) => (),
@@ -46,6 +56,11 @@ pub fn lock_trustcache(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Err
     Ok(lock)
 }
 /// Attempt to get a lock on the packages datastructures
+/// # Errors
+/// This function will error if:
+/// - the locks directory could not be created
+/// - the lock could not be created
+#[allow(clippy::module_name_repetitions)]
 pub fn lock_packages(use_local_lockfile: bool) -> Result<Lockfile, Box<dyn Error>> {
     match create_config_structure(use_local_lockfile) {
         Ok(_) => (),

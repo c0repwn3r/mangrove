@@ -1,4 +1,8 @@
 //! # High-level pure-rust AES implementation using the `aes` crate as a backend
+//! This is a very high-level aes cipher implementation that is used in libmangrove. It uses the `aes` crate as a backend.
+//! WARNING: This code itself has not been independently verified to be proper usage.
+//! The `aes` crate HAS received an independent security audit and no major issues were found.
+//! Use at your own risk.
 
 use crate::aes_cipher;
 use aes::cipher::BlockSizeUser;
@@ -22,6 +26,7 @@ aes_cipher!(AES256Cipher, Aes256, 32);
 macro_rules! aes_cipher {
     ($struct_name:ident,$crypto_backend:tt,$ks:expr) => {
         /// A wrapper around a bare AES construct.
+        /// You shouldn't construct this directly; use the `new` function instead
         pub struct $struct_name {
             key: [u8; $ks],
             bs: usize,
@@ -30,7 +35,12 @@ macro_rules! aes_cipher {
         impl $struct_name {
             // new
             /// Given a fixed-size array containing a key, create a new AES construct.
-            //
+            /// # Example
+            /// ```rust
+            /// // Due to an annoying limitation with triple-slash doc comments, I have to pick one cipher to use here. Any work
+            /// use libmangrove::aes::AES128Cipher;
+            /// let cipher: AES128Cipher = AES128Cipher::new([0; 16]);
+            /// ```
             pub fn new(key: [u8; $ks]) -> Self {
                 Self {
                     key,
@@ -40,7 +50,15 @@ macro_rules! aes_cipher {
 
             // encrypt
             /// Given an array of data, encrypt it and return the result as a byte vector.
-            //
+            /// # Example
+            /// ```rust
+            /// // Due to an annoying limitation with triple-slash doc comments, I have to pick one cipher to use here. Any work
+            /// use libmangrove::aes::AES128Cipher;
+            /// let mut cipher: AES128Cipher = AES128Cipher::new([0; 16]);
+            /// let data = [0; 16];
+            /// let enc_data = cipher.encrypt(&data);
+            /// assert_eq!(enc_data, vec![102, 233, 75, 212, 239, 138, 44, 59, 136, 76, 250, 89, 202, 52, 43, 46]);
+            /// ```
             pub fn encrypt(self: &mut $struct_name, data: &[u8]) -> Vec<u8> {
                 let mut dvec = data.to_vec();
                 self.pad(&mut dvec);
@@ -58,7 +76,18 @@ macro_rules! aes_cipher {
 
             // decrypt
             /// Given an array of data, decrypt it and return the result as a byte vector.
-            //
+            /// # Example
+            /// ```rust
+            /// use libmangrove::aes::AES128Cipher;
+            /// let key = [42u8; 16];
+            /// let mut cipher = AES128Cipher::new(key);
+            /// let data = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)!@#$%^&*("
+            ///             .to_string()
+            ///             .into_bytes();
+            /// let encrypted = cipher.encrypt(&data);
+            /// let decrypted = cipher.decrypt(&encrypted);
+            /// assert_eq!(data, decrypted);
+            /// ```
             pub fn decrypt(self: &mut $struct_name, data: &[u8]) -> Vec<u8> {
                 let cipher = <$crypto_backend>::new(&GenericArray::from(self.key));
                 let mut decrypted: Vec<u8> = vec![];
@@ -75,7 +104,7 @@ macro_rules! aes_cipher {
             // pad
             /// Apply PKCS#7 padding to the given data vector to extend it to the required block size.
             /// This will mutate **the original vector** and will not return anything.
-            //
+            /// You probably don't need to use this directly.
             fn pad(self: &$struct_name, data: &mut Vec<u8>) {
                 // Explaination:
                 // Determine the amount of padding required to get to the required block size (self.bs),
@@ -95,7 +124,7 @@ macro_rules! aes_cipher {
             // unpad
             /// Remove PKCS#7 padding from a given data vector.
             /// This does not mutate the original vector, and instead returns a new one.
-            //
+            /// You probably don't need to use this directly.
             fn unpad(self: &$struct_name, data: Vec<u8>) -> Vec<u8> {
                 // Explaination:
                 // The `pad` function above uses the amount of padding converted to a char
