@@ -505,8 +505,11 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
             // Set permissions, owner, and mtime
             #[allow(clippy::cast_possible_truncation)] // Safe because any overflow is invalid anyway
             {
+                debug!("setting perms on {}", format!("{}{}", target, folder.installpath));
                 fs::set_permissions(format!("{}{}", target, folder.installpath), Permissions::from_mode(folder.meta.permissions as u32))?;
+                debug!("setting owner on {}", format!("{}{}", target, folder.installpath));
                 format!("{}{}", target, folder.installpath).set_owner(folder.meta.owner as u32)?;
+                debug!("setting group on {}", format!("{}{}", target, folder.installpath));
                 format!("{}{}", target, folder.installpath).set_group(folder.meta.group as u32)?;
             }
         }
