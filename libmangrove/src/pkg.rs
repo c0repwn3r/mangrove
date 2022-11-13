@@ -505,6 +505,8 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
             // Set permissions, owner, and mtime
             #[allow(clippy::cast_possible_truncation)] // Safe because any overflow is invalid anyway
             {
+                debug!("setting permissions on {} to {:?}", format!("{}{}", target, folder.installpath), folder.meta);
+                debug!("{} {:?}", folder.meta.permissions as u32, Permissions::from_mode(folder.meta.permissions as u32));
                 debug!("setting perms on {}", format!("{}{}", target, folder.installpath));
                 fs::set_permissions(format!("{}{}", target, folder.installpath), Permissions::from_mode(folder.meta.permissions as u32))?;
                 debug!("setting owner on {}", format!("{}{}", target, folder.installpath));
@@ -543,6 +545,7 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
                 // Set permissions, owner, and mtime
                 #[allow(clippy::cast_possible_truncation)] // Safe because any overflow is invalid anyway
                 {
+                    debug!("setting permissions on {} to {:?}", format!("{}{}", target, f_to_extract.installpath), f_to_extract.meta);
                     fs::set_permissions(format!("{}{}", target, f_to_extract.installpath), Permissions::from_mode(f_to_extract.meta.permissions as u32))?;
                     format!("{}{}", target, f_to_extract.installpath).set_owner(f_to_extract.meta.owner as u32)?;
                     format!("{}{}", target, f_to_extract.installpath).set_group(f_to_extract.meta.group as u32)?;
