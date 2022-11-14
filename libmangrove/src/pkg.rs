@@ -3,10 +3,11 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::Debug;
-use std::fs::{self, create_dir_all, File, remove_dir_all, remove_file};
+use std::fs::{self, create_dir_all, File, Permissions, remove_dir_all, remove_file, set_permissions};
 use std::io::{Cursor, Read};
-use std::os::unix::fs::symlink;
+use std::os::unix::fs::{PermissionsExt, symlink};
 use std::path::Path;
+use file_owner::PathExt;
 
 use log::debug;
 use serde::{Deserialize, Serialize};
@@ -499,6 +500,14 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
             }
             debug!("creating directory {}", format!("{}{}", target, folder.installpath));
             create_dir_all(format!("{}{}", target, folder.installpath))?;
+
+            // Set permissions
+            #[allow(clippy::cast_possible_truncation)] // Safe, because any value that would cause this is an invalid value anyways
+            {
+                format!("{}{}", target, folder.installpath).set_owner(folder.meta.owner as u32)?;
+                format!("{}{}", target, folder.installpath).set_group(folder.meta.group as u32)?;
+                set_permissions(format!("{}{}", target, folder.installpath), Permissions::from_mode(folder.meta.permissions as u32))?;
+            }
         }
     }
     if let Some(files) = pkginfo.pkgcontents.files {
@@ -525,6 +534,14 @@ pub fn extract_pkg_to(package: &Vec<u8>, target: String) -> Result<(), Box<dyn E
                     file.read_to_end(&mut data)?;
                     debug!("data: {:?}", data);
                     fs::write(format!("{}{}", target, &f_to_extract.installpath), data)?;
+                }
+
+                // Set permissions
+                #[allow(clippy::cast_possible_truncation)] // Safe, because any value that would cause this is an invalid value anyways
+                {
+                    format!("{}{}", target, f_to_extract.installpath).set_owner(f_to_extract.meta.owner as u32)?;
+                    format!("{}{}", target, f_to_extract.installpath).set_group(f_to_extract.meta.group as u32)?;
+                    set_permissions(format!("{}{}", target, f_to_extract.installpath), Permissions::from_mode(f_to_extract.meta.permissions as u32))?;
                 }
             }
         }
