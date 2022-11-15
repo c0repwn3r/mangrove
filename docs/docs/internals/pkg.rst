@@ -1,0 +1,261 @@
+Package Format
+==============
+Mangrove uses a custom package format built from the ground up to meet the :ref:`Mangrove Design Principles <internals_intro>`.
+
+.. note::
+    This details the unsigned package format, which is normally contained inside the Signed Package Format. For more information on encrypted packages, see [signed packages](signed_pkg.md)
+
+Naming Convention
+-----------------
+Mangrove package files all follow a common naming convention:
+``<pkgbase>_<pkgver>_<arch>.mgve``
+
+This is shared between encrypted and unencrypted packages. The package manager can automatically differentiate between the two because of the radically different structure of both formats.
+
+Outer Container
+---------------
+Unencrypted mangrove packages are stored in a Zlib-compressed tar archive, which contain the target filesystem and a ``pkginfo`` file.
+
+The non-``pkginfo`` files contains the folder and file structure of the installed package, with the exception of symlinks. Symlinks are stored in the pkginfo file, and not placed inside the package to save space.
+
+pkginfo
+-------
+
+``pkginfo`` is, as the name suggests, the Package Information file. As with most other serialized binary files in Mangrove, it is a MessagePack-encoded data structure, which is defined as follows:
+
+Here is a convenient table representing the entire pkginfo file:
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - pkgname
+      - no
+      - String
+      - The name of the package
+
+    * - pkgver
+      - no
+      - Version
+      - The version of the package
+
+    * - shortdesc
+      - no
+      - String
+      - A short description of the package
+
+    * - longdesc
+      - yes
+      - String
+      - A longer description of the packager
+
+    * - arch
+      - no
+      - Architecture
+      - The system architecture of the package
+
+    * - url
+      - yes
+      - String
+      - An optional URL to the homepage of the package
+
+    * - license
+      - yes
+      - String
+      - The SPDX-License-Identifier for this package
+
+    * - groups
+      - yes
+      - Vec<String>
+      - A list of groups this package is a part of
+
+    * - depends
+      - yes
+      - Vec<PkgSpec>
+      - A list of packages this package depends on
+
+    * - optdepends
+      - yes
+      - Vec<PkgSpec>
+      - A list of packages this package optionally depends on
+
+    * - provides
+      - yes
+      - Vec<PkgSpec>
+      - A list of packages this package provides the functionality for
+
+    * - conflicts
+      - yes
+      - Vec<PkgSpec>
+      - A list of packages this package conflicts
+
+    * - replaces
+      - yes
+      - Vec<PkgSpec>
+      - A list of packages this package replaces
+
+    * - installed_size
+      - no
+      - usize
+      - The total installed size of the package
+
+    * - pkgcontents
+      - no
+      - PackageContents
+      - A listing of the contents of this package, and their permissions and install targets.
+
+``pkgcontents`` is a instance of ``PackageContents``, which is just an enumeration of the package's contents.
+
+Here's the table for ``PackageContents``:
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - folders
+      - yes
+      - Vec<PackageFolder>
+      - A list of folders, if any, that are installed by this package
+
+    * - files
+      - yes
+      - Vec<PackageFile>
+      - A list of files, if any, that are installed by this package
+
+    * - links
+      - yes
+      - Vec<PackageLink>
+      - A list of symbolic links, if any, that are created by this package
+
+The table for ``PackageFolder``:
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - name
+      - no
+      - String
+      - The name of the folder inside the package file
+
+    * - mtime
+      - no
+      - usize
+      - The last modified time of the folder. This is **NOT** used by the reference implementation.
+
+    * - installpath
+      - no
+      - String
+      - The path to install the folder to on the target system, relative to the target.
+
+    * - meta
+      - no
+      - FileMetadata
+      - The file permissions and metadata
+
+
+.. caution::
+    Due to an intentional design decision while creating mangrove, while it is possible for ``name`` and ``installpath`` to be different, this constitutes an invalid package entry, and it will either error or be ignored.
+
+``PackageFile``:
+
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - name
+      - no
+      - String
+      - The name of the file inside the package
+
+    * - sha256
+      - no
+      - String
+      - The sha256 hash of the file **after decompression**
+
+    * - meta
+      - no
+      - FileMetadata
+      - The file's permissions and metadata
+
+    * - mtime
+      - no
+      - usize
+      - The last modified time of the file
+
+    * - installpath
+      - no
+      - String
+      - The path to extract the file to to install
+
+.. caution::
+    Due to an intentional design decision while creating mangrove, while it is possible for `name` and `installpath` to be different, this constitutes an invalid package entry, and it will either error or be ignored.
+
+``PackageLink``:
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - file
+      - no
+      - String
+      - The source file of the symbolic link
+
+    * - mtime
+      - no
+      - usize
+      - The last modified time of the link. This is **NOT** used by the reference implementation.
+
+    * - target
+      - no
+      - String
+      - The target file of the symbolic link
+
+Finally, ``FileMetadata``:
+
+.. list-table::
+    :header-rows: 1
+
+    * - Field
+      - Optional
+      - Type
+      - Description
+
+    * - owner
+      - no
+      - usize
+      - The file owner UID
+
+    * - group
+      - no
+      - usize
+      - The file group GID
+
+    * - permissions
+      - no
+      - usize
+      - The file's mode, (st_mode)
+
+These structures are all serialized using `MessagePack <https://messagepack.org>`_, and the result is saved to the pkginfo file.
