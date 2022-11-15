@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A note on Windows compatability" href="windows.html" /><link rel="prev" title="Signed Package Format" href="signed_pkg.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Transactions" href="transactions.html" /><link rel="prev" title="Package Format" href="pkg.html" />
 
     <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
-        <title>Transactions - Mangrove 0.2.0 documentation</title>
+        <title>Signed Package Format - Mangrove 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -156,11 +156,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../internals.html">Internals</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="pkg.html">Package Format</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="signed_pkg.html">Signed Package Format</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="pkg.html">Package Format</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Signed Package Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rationale">Rationale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-the-data-is-encrypted">How the data is encrypted</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transactions.html">Transactions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="windows.html">A note on Windows compatability</a></li>
 </ul>
 </li>
@@ -198,27 +201,189 @@
           </label>
         </div>
         <article role="main">
-          <section id="transactions">
-<h1>Transactions<a class="headerlink" href="#transactions" title="Permalink to this heading">#</a></h1>
-<p>The highest level action in Mangrove is known as a Transaction. A transaction is a collection of other actions, such as installing, updating, or removing packages.</p>
+          <section id="signed-package-format">
+<h1>Signed Package Format<a class="headerlink" href="#signed-package-format" title="Permalink to this heading">#</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>A transaction cannot contain another transaction, to prevent transactions containing themselves</p>
+<p>This document refers to the Signed Package Format, which is Mangrove’s encrypted file container. It is used to contain <a class="reference internal" href="pkg.html#pkg-intro"><span class="std std-ref">package files</span></a>, which contain package data.</p>
 </div>
-<p>A transaction is <strong>non-persistent</strong>, meaning that it is stored in-memory at runtime.
-Transactions can contain the following actions:</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Signed Packages, contrary to their name, can actually be used for any file, however they are engineered to be very difficult to decrypt, on purpose, and are therefore not recommended for that purpose.</p>
+</div>
+<p>Mangrove’s “signed packages” are <em>actually</em> encrypted heavily using a combination of AES256 and Ed25519.</p>
+</section>
+<section id="rationale">
+<h1>Rationale<a class="headerlink" href="#rationale" title="Permalink to this heading">#</a></h1>
+<p>Why are we encrypting packages in the first place?
+Mangrove was carefully planned out weeks before development even began. The decision to encrypt packages was made for several reasons:</p>
 <ul class="simple">
-<li><p><cite>install</cite> - install a package from a repository</p></li>
-<li><p><cite>update</cite> - a superset of <cite>install</cite>, used to update an already installed package</p></li>
-<li><p><cite>remove</cite> - remove a currently installed package</p></li>
-<li><p><cite>reinstall</cite> - remove, then install a package from a repository</p></li>
+<li><dl class="simple">
+<dt>it makes it pretty much impossible for users to install packages that are tampered with by accident</dt><dd><ul>
+<li><p>by design tampered packages are unreadable, because the signature wont match, and therefore the derived encryption key wont either</p></li>
 </ul>
-<p>There can be an unlimited number of actions within one transaction, with a few exceptions:</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>it makes corruptions immediately noticeable, without a possibility of system damage</dt><dd><ul>
+<li><p>as a corruption in the file would result in a signature mismatch, and therefore the wrong encryption key being derived, the resultant data would be garbage and there is an astronomically small chance that it will get anywhere past archive open</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>This decision has some downsides, but which have been deemed too small to consider an issue:</p>
 <ul class="simple">
-<li><p>Mangrove must update itself in a seperate transaction (a transaction containing only a single <cite>install</cite> action)</p></li>
-<li><p>All operations are mutually exclusive - i.e. you cannot <cite>install</cite> and <cite>update</cite> the same package in one transaction</p></li>
-<li><p>A package cannot be operated on if it has been locked.</p></li>
+<li><dl class="simple">
+<dt>a user needs to trust the signing key of a package before the package manager can even recognize it as a valid package</dt><dd><ul>
+<li><dl class="simple">
+<dt>this is good practice anyway; users shouldn’t be able to install unsigned packages easily</dt><dd><ul>
+<li><p>especially since mgve provides good tooling to very, very easily sign your packages, there is no situation other then malice where an unsigned package ever needs to be installed</p></li>
 </ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>it can be difficult to inspect the contents of packages manually</dt><dd><ul>
+<li><p>this can be accomplished by “installing” the package to a local target directory, which will extract the files, while still verifying signatures and performing all normal safety checks</p></li>
+<li><p>we very intentionally do not and never will provide a utility to convert an already signed package into an unsigned one. This defeats the purpose of signing packages in the first place, and opens it back up to tampering.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Anyways, that’s enough theory. Into the technicalities!</p>
+</section>
+<section id="structure">
+<h1>Structure<a class="headerlink" href="#structure" title="Permalink to this heading">#</a></h1>
+<p>Signed packages follow a very specific binary structure to represent their data.
+The binary starts off with the bytes <code class="docutils literal notranslate"><span class="pre">4D</span> <span class="pre">47</span> <span class="pre">56</span> <span class="pre">45</span></code>, which correspond to <code class="docutils literal notranslate"><span class="pre">MGVE</span></code>, hex-encoded. This serves as the “magic” for signed packages - and can be used to quickly determine if the file we are working with has a chance of being a signed package.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>field</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>magic</p></td>
+<td><p>0x4d475645</p></td>
+<td><p>‘MGVE’ ascii, quickly identify possible package files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Next up is the signature length. It is one, byte, a <code class="docutils literal notranslate"><span class="pre">u8</span></code>/<code class="docutils literal notranslate"><span class="pre">uint8_t</span></code> which represents the signature’s size in bytes. This was picked because ed25519 signatures are only 64 bytes and this allows for room for expansion with a later revision to the protocol.
+After the signature length, is the signature itself. It is an unknown number of raw bytes, with length determined by <code class="docutils literal notranslate"><span class="pre">s_len</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>field</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>magic</p></td>
+<td><p>0x4d475645</p></td>
+<td><p>‘MGVE’ ascii, quickly identify possible package files</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_len</p></td>
+<td><p>0x??</p></td>
+<td><p>Describe the length, up to 255 bytes, of the following signature.</p></td>
+</tr>
+<tr class="row-even"><td><p>s_dat</p></td>
+<td><p>0x?? * s_len</p></td>
+<td><p>The data of the ed25519 signature of the package contents</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>We then include a null byte, which is the signature-data delimiter. It is an anchor point used to validate the preceding structure.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>field</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>magic</p></td>
+<td><p>0x4d475645</p></td>
+<td><p>‘MGVE’ ascii, quickly identify possible package files</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_len</p></td>
+<td><p>0x??</p></td>
+<td><p>Describe the length, up to 255 bytes, of the following signature.</p></td>
+</tr>
+<tr class="row-even"><td><p>s_dat</p></td>
+<td><p>0x?? * s_len</p></td>
+<td><p>The data of the ed25519 signature of the package contents</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_sep</p></td>
+<td><p>0x00</p></td>
+<td><p>Anchor the signature and the data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Next up is a 32-bit unsigned integer to put a length constraint on the actual encrypted data, followed by the encrypted data itself.
+To cap it off, <code class="docutils literal notranslate"><span class="pre">0x42</span></code> is used as an ending delimiter.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>field</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>magic</p></td>
+<td><p>0x4d475645</p></td>
+<td><p>‘MGVE’ ascii, quickly identify possible package files</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_len</p></td>
+<td><p>0x??</p></td>
+<td><p>Describe the length, up to 255 bytes, of the following signature.</p></td>
+</tr>
+<tr class="row-even"><td><p>s_dat</p></td>
+<td><p>0x?? * s_len</p></td>
+<td><p>The data of the ed25519 signature of the package contents</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_sep</p></td>
+<td><p>0x00</p></td>
+<td><p>Anchor the signature and the data</p></td>
+</tr>
+<tr class="row-even"><td><p>d_len</p></td>
+<td><p>0x????????</p></td>
+<td><p>Describe the length, up to about 2.41 GB, of the following encrypted data.</p></td>
+</tr>
+<tr class="row-odd"><td><p>d_dat</p></td>
+<td><p>0x?? * d_len</p></td>
+<td><p>The actual encrypted data of the package</p></td>
+</tr>
+<tr class="row-even"><td><p>p_val</p></td>
+<td><p>0x42</p></td>
+<td><p>Anchor the end of the package</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>And there you have it! That is the binary structure of a signed package.</p>
+</section>
+<section id="how-the-data-is-encrypted">
+<h1>How the data is encrypted<a class="headerlink" href="#how-the-data-is-encrypted" title="Permalink to this heading">#</a></h1>
+<p>Upon getting data to encrypt and a Ed25519 PrivateKey, the implementation should use the PrivateKey to create a Ed25519 digital signature of the data.
+It should then perform a sha256 hash on this signature, and use it as a key for a PKCS#7 padded AES-256 cipher.
+This cipher is used to encrypt the package data.
+The implementation should then put it into the above format, and return it to the caller.</p>
 </section>
 
         </article>
@@ -226,23 +391,23 @@ Transactions can contain the following actions:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="windows.html">
+          <a class="next-page" href="transactions.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">A note on Windows compatability</div>
+                <div class="title">Transactions</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="signed_pkg.html">
+          <a class="prev-page" href="pkg.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Signed Package Format</div>
+                <div class="title">Package Format</div>
                 
               </div>
             </a>

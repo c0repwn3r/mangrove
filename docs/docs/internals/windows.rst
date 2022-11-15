@@ -1,3 +1,5 @@
+.. windows_intro:
+
 A note on Windows compatability
 -------------------------------
 

@@ -1,3 +1,5 @@
+.. _pkg_intro:
+
 Package Format
 ==============
 Mangrove uses a custom package format built from the ground up to meet the :ref:`Mangrove Design Principles <internals_intro>`.
@@ -259,3 +261,6 @@ Finally, ``FileMetadata``:
       - The file's mode, (st_mode)
 
 These structures are all serialized using `MessagePack <https://messagepack.org>`_, and the result is saved to the pkginfo file.
+
+.. toctree::
+    signed_pkg

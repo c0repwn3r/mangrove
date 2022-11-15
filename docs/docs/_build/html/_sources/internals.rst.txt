@@ -7,7 +7,7 @@ Mangrove uses a custom packaging system that is designed to meet the Mangrove de
 
 - the inner working of the package manager should be hidden to the average user
 - it should be *fast* - everything should be build for speed
-- it should be cross-platform - it should work on all Unix-based operating systems :ref:`(about windows compatability) <internals/windows.md>`
+- it should be cross-platform - it should work on all Unix-based operating systems :ref:`(about windows compatability) <windows_intro>`
 - it should be free and open source for anyone to audit or modify as needed
 - minimum system requirements should be as low as possible
 
@@ -19,7 +19,7 @@ The current implementation accomplishes these things by doing the following:
 - it is open source and licensed under the GNU GPLv3
 - filesizes are minimized and memory constraints are a priority
 
-To start, get a high level view of all actions in the package manager: :ref:`transactions <internals/transactions.md>`
+To start, get a high level view of all actions in the package manager: :ref:`transactions <transactions_intro>`
 
 .. toctree::
     internals/pkg

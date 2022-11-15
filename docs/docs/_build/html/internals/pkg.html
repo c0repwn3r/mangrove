@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Transactions" href="transactions.html" /><link rel="prev" title="Internals" href="../internals.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Signed Package Format" href="signed_pkg.html" /><link rel="prev" title="Internals" href="../internals.html" />
 
     <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Package Format - Mangrove 0.2.0 documentation</title>
@@ -156,7 +156,13 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../internals.html">Internals</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Package Format</a></li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Package Format</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="signed_pkg.html">Signed Package Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="signed_pkg.html#rationale">Rationale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="signed_pkg.html#structure">Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="signed_pkg.html#how-the-data-is-encrypted">How the data is encrypted</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="transactions.html">Transactions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="windows.html">A note on Windows compatability</a></li>
 </ul>
@@ -196,7 +202,7 @@
         </div>
         <article role="main">
           <section id="package-format">
-<h1>Package Format<a class="headerlink" href="#package-format" title="Permalink to this heading">#</a></h1>
+<span id="pkg-intro"></span><h1>Package Format<a class="headerlink" href="#package-format" title="Permalink to this heading">#</a></h1>
 <p>Mangrove uses a custom package format built from the ground up to meet the <a class="reference internal" href="../internals.html#internals-intro"><span class="std std-ref">Mangrove Design Principles</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -475,6 +481,14 @@
 </table>
 </div>
 <p>These structures are all serialized using <a class="reference external" href="https://messagepack.org">MessagePack</a>, and the result is saved to the pkginfo file.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="signed_pkg.html">Signed Package Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signed_pkg.html#rationale">Rationale</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signed_pkg.html#structure">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="signed_pkg.html#how-the-data-is-encrypted">How the data is encrypted</a></li>
+</ul>
+</div>
 </section>
 </section>
 
@@ -483,12 +497,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="transactions.html">
+          <a class="next-page" href="signed_pkg.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Transactions</div>
+                <div class="title">Signed Package Format</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
